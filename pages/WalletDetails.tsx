@@ -1,6 +1,5 @@
 
-
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useFinance } from '../context/FinanceContext';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -10,6 +9,7 @@ import { TransactionDetailsModal } from '../components/TransactionDetailsModal';
 import { Transaction, CurrencyCode, SUPPORTED_CURRENCIES } from '../types';
 import { Drawer } from 'vaul';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+import { WalletIcon, ICON_OPTIONS } from '../components/WalletIcon';
 
 const COLORS = ['#CCFF00', '#00F0FF', '#FF0099', '#7000FF', '#FFFFFF', '#52525b', '#fbbf24', '#34d399'];
 
@@ -28,6 +28,8 @@ export const WalletDetails: React.FC = () => {
   // Wallet Edit State
   const [editName, setEditName] = useState('');
   const [editColor, setEditColor] = useState('');
+  const [editIcon, setEditIcon] = useState('');
+  const colorInputRef = useRef<HTMLInputElement>(null);
   
   // Transfer State
   const [transferAmount, setTransferAmount] = useState('');
@@ -92,11 +94,12 @@ export const WalletDetails: React.FC = () => {
   const handleOpenEdit = () => {
       setEditName(wallet.name);
       setEditColor(wallet.color);
+      setEditIcon(wallet.icon || '');
       setIsEditingWallet(true);
   };
 
   const handleSaveWallet = () => {
-      updateWallet(wallet.id, { name: editName, color: editColor });
+      updateWallet(wallet.id, { name: editName, color: editColor, icon: editIcon });
       setIsEditingWallet(false);
   };
 
@@ -136,42 +139,6 @@ export const WalletDetails: React.FC = () => {
     setAddDescription('');
   };
 
-  const EditWalletForm = () => (
-      <div className="space-y-6">
-          <div>
-             <label className="block text-xs font-mono text-gray-400 mb-2 uppercase">Wallet Name</label>
-             <input 
-                type="text" 
-                value={editName} 
-                onChange={(e) => setEditName(e.target.value)}
-                className="w-full bg-black border border-white/10 p-3 text-white font-mono focus:border-neon-green focus:outline-none"
-             />
-          </div>
-          <div>
-             <label className="block text-xs font-mono text-gray-400 mb-2 uppercase">Theme Color</label>
-             <div className="grid grid-cols-5 gap-2">
-                {['#CCFF00', '#00F0FF', '#FF0099', '#7000FF', '#FFFFFF'].map(c => (
-                    <button 
-                        key={c}
-                        onClick={() => setEditColor(c)}
-                        className={`h-8 w-full rounded-sm border ${editColor === c ? 'border-white ring-2 ring-white/20' : 'border-transparent'}`}
-                        style={{ backgroundColor: c }}
-                    />
-                ))}
-             </div>
-          </div>
-          
-          <div className="pt-4 border-t border-white/5 flex gap-3">
-              <Button onClick={handleSaveWallet} variant="neon" className="flex-1" icon={<Save size={16} />}>
-                  Save
-              </Button>
-              <Button onClick={handleDeleteWallet} variant="danger" className="flex-1" icon={<Trash2 size={16} />}>
-                  Delete
-              </Button>
-          </div>
-      </div>
-  );
-  
   const AddTransactionForm = () => (
       <form onSubmit={handleAddTransaction} className="space-y-6">
         <div className="grid grid-cols-2 gap-0 border border-white/10 rounded-sm overflow-hidden">
@@ -251,6 +218,75 @@ export const WalletDetails: React.FC = () => {
   const currentChartData = categoryStats[chartTab.toLowerCase() as 'income' | 'expense'];
   const totalChartValue = currentChartData.reduce((acc, curr) => acc + curr.value, 0);
 
+  // Inlined form logic to avoid remounting
+  const renderEditForm = () => (
+    <div className="space-y-6" onClick={(e) => e.stopPropagation()}>
+        <div>
+           <label className="block text-xs font-mono text-gray-400 mb-2 uppercase">Wallet Name</label>
+           <input 
+              type="text" 
+              value={editName} 
+              onChange={(e) => setEditName(e.target.value)}
+              className="w-full bg-black border border-white/10 p-3 text-white font-mono focus:border-neon-green focus:outline-none"
+           />
+        </div>
+        <div>
+           <label className="block text-xs font-mono text-gray-400 mb-2 uppercase">Theme Color</label>
+           <div className="flex flex-wrap gap-3 items-center">
+              {['#CCFF00', '#00F0FF', '#FF0099', '#7000FF', '#FFFFFF', '#ef4444', '#f97316', '#eab308', '#22c55e'].map(c => (
+                  <button 
+                      key={c}
+                      onClick={() => setEditColor(c)}
+                      className={`h-8 w-8 rounded-full border transition-transform hover:scale-110 ${editColor === c ? 'border-white ring-2 ring-white/20 scale-110' : 'border-transparent'}`}
+                      style={{ backgroundColor: c }}
+                  />
+              ))}
+              {/* Custom Color Input */}
+              <div 
+                onClick={() => colorInputRef.current?.click()}
+                className="relative h-8 w-8 rounded-full overflow-hidden border border-white/20 hover:border-white transition-all cursor-pointer group flex items-center justify-center"
+              >
+                <div className="absolute inset-0 bg-[conic-gradient(from_90deg,#fff,#000)] opacity-50 pointer-events-none" />
+                <div className="w-full h-full bg-[conic-gradient(from_0deg,red,orange,yellow,green,blue,indigo,violet,red)] pointer-events-none" />
+                <Plus size={14} className="absolute text-white pointer-events-none mix-blend-difference z-10" />
+                <input 
+                  ref={colorInputRef}
+                  type="color" 
+                  value={editColor} 
+                  onChange={(e) => setEditColor(e.target.value)}
+                  className="absolute inset-0 opacity-0 w-full h-full p-0 border-0 pointer-events-none" 
+                />
+              </div>
+           </div>
+        </div>
+        
+        {/* Icon Picker */}
+        <div>
+           <label className="block text-xs font-mono text-gray-400 mb-2 uppercase">Icon</label>
+           <div className="grid grid-cols-6 gap-2 bg-black/50 p-4 border border-white/5 rounded-lg max-h-48 overflow-y-auto custom-scrollbar">
+              {ICON_OPTIONS.map(iconName => (
+                  <button
+                      key={iconName}
+                      onClick={() => setEditIcon(iconName)}
+                      className={`p-2 rounded flex items-center justify-center transition-colors aspect-square ${editIcon === iconName ? 'bg-neon-green/20 text-neon-green border border-neon-green/50' : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white border border-transparent'}`}
+                  >
+                      <WalletIcon icon={iconName} size={20} />
+                  </button>
+              ))}
+           </div>
+        </div>
+        
+        <div className="pt-4 border-t border-white/5 flex gap-3">
+            <Button onClick={handleSaveWallet} variant="neon" className="flex-1" icon={<Save size={16} />}>
+                Save
+            </Button>
+            <Button onClick={handleDeleteWallet} variant="danger" className="flex-1" icon={<Trash2 size={16} />}>
+                Delete
+            </Button>
+        </div>
+    </div>
+  );
+
   return (
     <div className="p-8 pb-20 max-w-5xl mx-auto">
       <Button 
@@ -288,6 +324,11 @@ export const WalletDetails: React.FC = () => {
 
         <div className="bg-surface border border-white/10 p-6 flex flex-col justify-between relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-transparent to-white/5 rounded-full blur-2xl transform translate-x-10 -translate-y-10 pointer-events-none" style={{ background: wallet.color, opacity: 0.1 }} />
+            
+            <div className="absolute top-4 right-4 text-white/10">
+                <WalletIcon icon={wallet.icon} type={wallet.type} size={48} />
+            </div>
+
             <div className="text-sm font-mono text-gray-400 uppercase">Available Balance</div>
             <div className="text-4xl font-mono font-bold text-white mt-2">
                 {wallet.balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })} <span className="text-lg text-gray-500">{wallet.baseCurrency}</span>
@@ -597,12 +638,13 @@ export const WalletDetails: React.FC = () => {
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 50, opacity: 0 }}
               className="bg-surface border border-white/10 p-8 w-full max-w-md relative z-10 shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
             >
                <button onClick={() => setIsEditingWallet(false)} className="absolute top-4 right-4 text-gray-500 hover:text-white">
                  <X size={24} />
                </button>
                <h2 className="text-2xl font-sans text-white mb-6">Edit Wallet</h2>
-               <EditWalletForm />
+               {renderEditForm()}
             </motion.div>
           </div>
         )}
@@ -617,7 +659,7 @@ export const WalletDetails: React.FC = () => {
                     <div className="p-4 bg-surface rounded-t-[10px]">
                         <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-white/10 mb-8" />
                         <Drawer.Title className="text-xl font-sans text-white mb-6">Edit Wallet</Drawer.Title>
-                        <EditWalletForm />
+                        {renderEditForm()}
                     </div>
                 </Drawer.Content>
             </Drawer.Portal>

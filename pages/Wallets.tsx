@@ -1,11 +1,13 @@
 
+
 import React, { useState } from 'react';
 import { useFinance } from '../context/FinanceContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Wallet as WalletIcon, X, CreditCard, Bitcoin } from 'lucide-react';
+import { Plus, Wallet as WalletIconDefault, X, CreditCard, Bitcoin } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { CurrencyCode, SUPPORTED_CURRENCIES, Wallet } from '../types';
 import { useNavigate } from 'react-router-dom';
+import { WalletIcon } from '../components/WalletIcon';
 
 export const Wallets: React.FC = () => {
   const { state, addWallet, rates, globalCurrency } = useFinance();
@@ -23,7 +25,9 @@ export const Wallets: React.FC = () => {
       name: newName,
       baseCurrency: newCurrency,
       type: newType,
-      color: newType === 'CRYPTO' ? '#FF0099' : '#00F0FF' 
+      color: newType === 'CRYPTO' ? '#FF0099' : '#00F0FF',
+      // Default icon based on type for simplicity in quick create, can be edited later
+      icon: '' 
     });
     setIsAdding(false);
     setNewName('');
@@ -59,8 +63,8 @@ export const Wallets: React.FC = () => {
             />
             
             <div className="flex justify-between items-start z-10">
-              <div className="p-3 bg-white/5 rounded-sm backdrop-blur-sm border border-white/5">
-                {wallet.type === 'CRYPTO' ? <Bitcoin size={24} color={wallet.color} /> : <CreditCard size={24} color={wallet.color} />}
+              <div className="p-3 bg-white/5 rounded-sm backdrop-blur-sm border border-white/5 text-white">
+                <WalletIcon icon={wallet.icon} type={wallet.type} size={24} style={{ color: wallet.color }} />
               </div>
               <span className="font-mono text-xs text-gray-500 border border-white/10 px-2 py-1 rounded-sm uppercase">
                 {wallet.baseCurrency}

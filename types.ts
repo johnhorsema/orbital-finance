@@ -14,6 +14,7 @@ export interface Wallet {
   baseCurrency: CurrencyCode;
   balance: number; // Stored in baseCurrency
   color: string;
+  icon?: string;
 }
 
 export interface Transaction {

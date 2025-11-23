@@ -1,8 +1,10 @@
+
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useFinance } from '../context/FinanceContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, Wallet as WalletIcon, Layers } from 'lucide-react';
+import { ChevronDown, Layers } from 'lucide-react';
+import { WalletIcon } from './WalletIcon';
 
 export const WalletSwitcher: React.FC = () => {
   const { state } = useFinance();
@@ -68,8 +70,8 @@ export const WalletSwitcher: React.FC = () => {
                   onClick={() => handleSelect(wallet.id)}
                   className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-colors text-left ${currentWalletId === wallet.id ? 'bg-white/10 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-white'}`}
                 >
-                  <div className="p-2 rounded-md bg-white/5">
-                    <WalletIcon size={16} style={{ color: wallet.color }} />
+                  <div className="p-2 rounded-md bg-white/5 text-white">
+                    <WalletIcon icon={wallet.icon} type={wallet.type} size={16} style={{ color: wallet.color }} />
                   </div>
                   <div className="flex flex-col">
                     <span className="font-mono text-xs font-bold">{wallet.name}</span>
