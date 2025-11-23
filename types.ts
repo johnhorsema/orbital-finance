@@ -1,6 +1,6 @@
 
 
-export type CurrencyCode = 'USD' | 'EUR' | 'GBP' | 'JPY' | 'BTC' | 'ETH' | 'SOL';
+export type CurrencyCode = 'USD' | 'EUR' | 'GBP' | 'JPY' | 'CAD' | 'HKD' | 'SGD' | 'KRW' | 'THB' | 'IDR' | 'BTC' | 'ETH' | 'SOL';
 
 export interface ExchangeRateResponse {
   date: string;
@@ -41,7 +41,7 @@ export interface AppState {
   categories: string[];
 }
 
-export const SUPPORTED_CURRENCIES: CurrencyCode[] = ['USD', 'EUR', 'GBP', 'JPY', 'BTC', 'ETH', 'SOL'];
+export const SUPPORTED_CURRENCIES: CurrencyCode[] = ['USD', 'EUR', 'GBP', 'JPY', 'CAD', 'HKD', 'SGD', 'KRW', 'THB', 'IDR', 'BTC', 'ETH', 'SOL'];
 
 export const DEFAULT_CATEGORIES = [
   'Travel', 'Food', 'Housing', 'Tech', 'Crypto', 'Freelance', 'Salary', 'Transport', 'Utilities', 'Entertainment', 'Transfer'

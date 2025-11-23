@@ -1,4 +1,5 @@
 
+
 import React, { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useFinance } from '../context/FinanceContext';
@@ -499,7 +500,7 @@ export const WalletDetails: React.FC = () => {
                 <Drawer.Content className="bg-surface border-t border-white/10 flex flex-col rounded-t-[10px] h-[85vh] mt-24 fixed bottom-0 left-0 right-0 z-[101] outline-none">
                     <div className="p-4 bg-surface rounded-t-[10px] flex-1 overflow-y-auto">
                         <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-white/10 mb-8" />
-                        <h2 className="text-xl font-sans text-white mb-6">Log Transaction</h2>
+                        <Drawer.Title className="text-xl font-sans text-white mb-6">Log Transaction</Drawer.Title>
                         <AddTransactionForm />
                     </div>
                 </Drawer.Content>
@@ -615,7 +616,7 @@ export const WalletDetails: React.FC = () => {
                 <Drawer.Content className="bg-surface border-t border-white/10 flex flex-col rounded-t-[10px] fixed bottom-0 left-0 right-0 z-[101] outline-none">
                     <div className="p-4 bg-surface rounded-t-[10px]">
                         <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-white/10 mb-8" />
-                        <h2 className="text-xl font-sans text-white mb-6">Edit Wallet</h2>
+                        <Drawer.Title className="text-xl font-sans text-white mb-6">Edit Wallet</Drawer.Title>
                         <EditWalletForm />
                     </div>
                 </Drawer.Content>

@@ -1,4 +1,5 @@
 
+
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { X, Trash2, Calendar, Tag, CreditCard, Save, Edit2, ArrowLeft } from 'lucide-react';
@@ -219,6 +220,7 @@ export const TransactionDetailsModal: React.FC<TransactionDetailsModalProps> = (
             <Drawer.Content className="bg-surface border-t border-white/10 flex flex-col rounded-t-[10px] mt-24 fixed bottom-0 left-0 right-0 z-[101] outline-none max-h-[90vh]">
               <div className="p-4 bg-surface rounded-t-[10px] flex-1 overflow-y-auto">
                 <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-white/10 mb-8" />
+                <Drawer.Title className="sr-only">Transaction Details</Drawer.Title>
                 <Content />
               </div>
             </Drawer.Content>

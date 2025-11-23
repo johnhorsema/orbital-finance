@@ -1,4 +1,5 @@
 
+
 import React, { useMemo, useState } from 'react';
 import { useFinance } from '../context/FinanceContext';
 import { motion, Variants, AnimatePresence } from 'framer-motion';
@@ -11,6 +12,13 @@ import { SUPPORTED_CURRENCIES, CurrencyCode, Transaction } from '../types';
 import { TransactionDetailsModal } from '../components/TransactionDetailsModal';
 import { Drawer } from 'vaul';
 import { useNavigate } from 'react-router-dom';
+
+const CURRENCY_SYMBOLS: Record<string, string> = {
+  USD: '$', EUR: '€', GBP: '£', JPY: '¥', 
+  CAD: 'C$', HKD: 'HK$', SGD: 'S$', 
+  KRW: '₩', THB: '฿', IDR: 'Rp',
+  BTC: '₿', ETH: 'Ξ', SOL: '◎'
+};
 
 export const Dashboard: React.FC = () => {
   const { state, rates, globalCurrency, refreshRates, addTransaction, deleteTransaction } = useFinance();
@@ -288,7 +296,7 @@ export const Dashboard: React.FC = () => {
             <h3 className="text-gray-400 font-mono text-sm uppercase tracking-widest mb-2">Net Worth</h3>
             <div className="text-5xl md:text-7xl font-sans font-bold text-white tracking-tight flex items-baseline gap-2">
               <span className="text-2xl text-neon-green">
-                {globalCurrency === 'USD' ? '$' : globalCurrency === 'EUR' ? '€' : globalCurrency}
+                {CURRENCY_SYMBOLS[globalCurrency] || globalCurrency}
               </span>
               {totalBalance.toLocaleString(undefined, { maximumFractionDigits: 2 })}
             </div>
@@ -316,7 +324,7 @@ export const Dashboard: React.FC = () => {
               </div>
               <div>
                 <div className="text-2xl font-mono text-white">
-                    {globalCurrency === 'USD' ? '$' : globalCurrency === 'EUR' ? '€' : ''}{monthlyStats.expense.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    {CURRENCY_SYMBOLS[globalCurrency] || ''}{monthlyStats.expense.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </div>
                 <div className="text-xs text-gray-500 mt-1">This Month</div>
               </div>
@@ -331,7 +339,7 @@ export const Dashboard: React.FC = () => {
               </div>
               <div>
                 <div className="text-2xl font-mono text-white">
-                    {globalCurrency === 'USD' ? '$' : globalCurrency === 'EUR' ? '€' : ''}{monthlyStats.income.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    {CURRENCY_SYMBOLS[globalCurrency] || ''}{monthlyStats.income.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </div>
                 <div className="text-xs text-gray-500 mt-1">This Month</div>
               </div>
@@ -458,7 +466,7 @@ export const Dashboard: React.FC = () => {
                 <Drawer.Content className="bg-surface border-t border-white/10 flex flex-col rounded-t-[10px] h-[85vh] mt-24 fixed bottom-0 left-0 right-0 z-[101] outline-none">
                     <div className="p-4 bg-surface rounded-t-[10px] flex-1 overflow-y-auto">
                         <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-white/10 mb-8" />
-                        <h2 className="text-xl font-sans text-white mb-6">Log Transaction</h2>
+                        <Drawer.Title className="text-xl font-sans text-white mb-6">Log Transaction</Drawer.Title>
                         <AddTransactionForm />
                     </div>
                 </Drawer.Content>
