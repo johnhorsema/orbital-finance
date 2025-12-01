@@ -25,10 +25,10 @@ Unlike traditional finance apps that lock you into a single currency or boring s
 ## 📸 Screenshots
 
 ### Overview
-![Overview](/screenshots/overview.png)
+<img width="1206" height="675" alt="overview" src="https://github.com/user-attachments/assets/0cd67d02-11a6-4fe6-8b11-3b612b875f30" />
 
 ### Exchange Rate
-![Overview](/screenshots/exchannge-rates.png)
+<img width="1223" height="651" alt="exchange-rates" src="https://github.com/user-attachments/assets/d20e85c0-d0f6-486b-8c72-dd197baab881" />
 
 ---
 
