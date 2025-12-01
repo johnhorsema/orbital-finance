@@ -26,11 +26,11 @@ export const ExchangeStatus: React.FC = () => {
 
   return (
     <div className="p-8 max-w-5xl mx-auto pb-24">
-      <div className="mb-12 border-b border-white/5 pb-8">
-        <h1 className="text-4xl font-sans font-light text-white tracking-tighter mb-4">
+      <div className="mb-12 border-b border-content/5 pb-8">
+        <h1 className="text-4xl font-sans font-light text-content tracking-tighter mb-4">
           MARKET <span className="text-neon-cyan font-bold">UPLINK</span>
         </h1>
-        <p className="text-gray-400 font-mono max-w-2xl">
+        <p className="text-muted font-mono max-w-2xl">
           Real-time connection status to global exchanges. This interface monitors the integrity of the pricing feeds used for wallet valuation.
         </p>
       </div>
@@ -40,18 +40,18 @@ export const ExchangeStatus: React.FC = () => {
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-surface border border-white/10 p-8 relative overflow-hidden"
+          className="bg-surface border border-content/10 p-8 relative overflow-hidden"
         >
           <div className="absolute top-0 right-0 p-4 opacity-5">
             <Server size={100} />
           </div>
           
           <div className="flex items-center gap-4 mb-6">
-            <div className={`p-3 rounded-full bg-white/5 ${getStatusColor(rateStatus.source)}`}>
+            <div className={`p-3 rounded-full bg-content/5 ${getStatusColor(rateStatus.source)}`}>
               <Activity size={24} />
             </div>
             <div>
-              <h2 className="text-white font-sans text-lg">Connection Status</h2>
+              <h2 className="text-content font-sans text-lg">Connection Status</h2>
               <div className={`font-mono text-sm uppercase ${getStatusColor(rateStatus.source)}`}>
                 {rateStatus.source === 'error' ? 'Disconnected' : 'Active'}
               </div>
@@ -59,17 +59,17 @@ export const ExchangeStatus: React.FC = () => {
           </div>
 
           <div className="space-y-4 font-mono text-sm">
-            <div className="flex justify-between py-2 border-b border-white/5">
-              <span className="text-gray-500">Source</span>
-              <span className="text-white capitalize">{rateStatus.source} Node</span>
+            <div className="flex justify-between py-2 border-b border-content/5">
+              <span className="text-muted">Source</span>
+              <span className="text-content capitalize">{rateStatus.source} Node</span>
             </div>
-            <div className="flex justify-between py-2 border-b border-white/5">
-              <span className="text-gray-500">Base Currency</span>
-              <span className="text-white">{globalCurrency}</span>
+            <div className="flex justify-between py-2 border-b border-content/5">
+              <span className="text-muted">Base Currency</span>
+              <span className="text-content">{globalCurrency}</span>
             </div>
-            <div className="flex justify-between py-2 border-b border-white/5">
-              <span className="text-gray-500">Last Sync</span>
-              <span className="text-white">
+            <div className="flex justify-between py-2 border-b border-content/5">
+              <span className="text-muted">Last Sync</span>
+              <span className="text-content">
                 {rateStatus.lastUpdated ? rateStatus.lastUpdated.toLocaleTimeString() : 'Never'}
               </span>
             </div>
@@ -87,17 +87,17 @@ export const ExchangeStatus: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-surface/50 border border-dashed border-white/10 p-8 flex flex-col justify-center"
+          className="bg-surface/50 border border-dashed border-content/10 p-8 flex flex-col justify-center"
         >
-          <h3 className="text-white font-sans text-lg mb-4 flex items-center gap-2">
+          <h3 className="text-content font-sans text-lg mb-4 flex items-center gap-2">
             <AlertTriangle size={18} className="text-neon-pink" />
             Protocol Details
           </h3>
-          <p className="text-gray-400 text-sm leading-relaxed mb-4">
-            Rates are sourced via <span className="text-white font-mono">@fawazahmed0/currency-api</span>.
+          <p className="text-muted text-sm leading-relaxed mb-4">
+            Rates are sourced via <span className="text-content font-mono">@fawazahmed0/currency-api</span>.
             The system implements a failover mechanism:
           </p>
-          <ul className="space-y-2 text-sm text-gray-500 font-mono">
+          <ul className="space-y-2 text-sm text-muted font-mono">
              <li className="flex items-center gap-2">
                 <CheckCircle size={14} className="text-neon-green" />
                 <span>Primary: cdn.jsdelivr.net (Edge)</span>
@@ -116,8 +116,8 @@ export const ExchangeStatus: React.FC = () => {
 
       {/* Raw Rates View */}
       <div className="flex items-end justify-between mb-6">
-         <h3 className="text-white font-mono uppercase tracking-widest">Live Feed ({totalRates} pairs)</h3>
-         <div className="text-xs text-gray-500 font-mono">
+         <h3 className="text-content font-mono uppercase tracking-widest">Live Feed ({totalRates} pairs)</h3>
+         <div className="text-xs text-muted font-mono">
             Showing {Math.min(displayCount, totalRates)} of {totalRates}
          </div>
       </div>
@@ -129,10 +129,10 @@ export const ExchangeStatus: React.FC = () => {
              initial={{ opacity: 0 }}
              animate={{ opacity: 1 }}
              transition={{ delay: 0.05 }}
-             className="bg-black border border-white/5 p-4 hover:border-neon-cyan/30 transition-colors"
+             className="bg-field border border-content/5 p-4 hover:border-neon-cyan/30 transition-colors"
            >
-             <div className="text-gray-500 text-xs font-mono uppercase mb-1">{curr}</div>
-             <div className="text-white font-mono text-sm truncate">{val.toFixed(4)}</div>
+             <div className="text-muted text-xs font-mono uppercase mb-1">{curr}</div>
+             <div className="text-content font-mono text-sm truncate">{(val as number).toFixed(4)}</div>
            </motion.div>
          ))}
       </div>

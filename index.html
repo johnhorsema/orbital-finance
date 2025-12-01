@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -20,20 +21,23 @@
               mono: ['JetBrains Mono', 'monospace'],
             },
             colors: {
-              void: '#050508', // Darker than black
-              surface: '#0E0E14',
-              surfaceHighlight: '#1A1A24',
+              // Colors defined using RGB vars to support opacity modifiers
+              void: 'rgb(var(--color-void) / <alpha-value>)', 
+              surface: 'rgb(var(--color-surface) / <alpha-value>)',
+              surfaceHighlight: 'rgb(var(--color-surface-highlight) / <alpha-value>)',
+              content: 'rgb(var(--color-content) / <alpha-value>)',
+              muted: 'rgb(var(--color-muted) / <alpha-value>)',
+              field: 'rgb(var(--color-field) / <alpha-value>)',
               neon: {
-                green: '#CCFF00',
-                purple: '#7000FF',
-                cyan: '#00F0FF',
-                pink: '#FF0099'
-              },
-              muted: '#52525b'
+                green: 'rgb(var(--color-neon-green) / <alpha-value>)',
+                purple: 'rgb(var(--color-neon-purple) / <alpha-value>)',
+                cyan: 'rgb(var(--color-neon-cyan) / <alpha-value>)',
+                pink: 'rgb(var(--color-neon-pink) / <alpha-value>)'
+              }
             },
             backgroundImage: {
-              'grid-pattern': "linear-gradient(to right, #1f1f2e 1px, transparent 1px), linear-gradient(to bottom, #1f1f2e 1px, transparent 1px)",
-              'radial-fade': "radial-gradient(circle at center, transparent 0%, #050508 100%)"
+              'grid-pattern': "linear-gradient(to right, rgb(var(--color-content) / 0.05) 1px, transparent 1px), linear-gradient(to bottom, rgb(var(--color-content) / 0.05) 1px, transparent 1px)",
+              'radial-fade': "radial-gradient(circle at center, transparent 0%, rgb(var(--color-void)) 100%)"
             },
             animation: {
               'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
@@ -43,9 +47,23 @@
       }
     </script>
     <style>
+      :root {
+        /* Default Orbital Theme (RGB values) */
+        --color-void: 5 5 8;          /* #050508 */
+        --color-surface: 14 14 20;    /* #0E0E14 */
+        --color-surface-highlight: 26 26 36; /* #1A1A24 */
+        --color-content: 255 255 255;
+        --color-muted: 161 161 170;
+        --color-field: 0 0 0;
+        --color-neon-green: 204 255 0;  /* #CCFF00 */
+        --color-neon-purple: 112 0 255; /* #7000FF */
+        --color-neon-cyan: 0 240 255;   /* #00F0FF */
+        --color-neon-pink: 255 0 153;   /* #FF0099 */
+      }
+
       body {
-        background-color: #050508;
-        color: #e4e4e7;
+        background-color: rgb(var(--color-void));
+        color: rgb(var(--color-content));
         overflow-x: hidden;
       }
       /* Custom Scrollbar */
@@ -54,23 +72,23 @@
         height: 8px;
       }
       ::-webkit-scrollbar-track {
-        background: #050508; 
+        background: rgb(var(--color-void)); 
       }
       ::-webkit-scrollbar-thumb {
-        background: #1A1A24; 
+        background: rgb(var(--color-surface-highlight)); 
         border-radius: 4px;
       }
       ::-webkit-scrollbar-thumb:hover {
-        background: #2a2a35; 
+        background: rgb(var(--color-content) / 0.2); 
       }
       .glass-panel {
-        background: rgba(14, 14, 20, 0.7);
+        background: rgba(var(--color-surface), 0.7);
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(var(--color-content), 0.05);
       }
       .neon-text {
-        text-shadow: 0 0 10px rgba(204, 255, 0, 0.3);
+        text-shadow: 0 0 10px rgba(var(--color-neon-green), 0.3);
       }
     </style>
   <script type="importmap">

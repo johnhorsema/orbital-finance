@@ -1,4 +1,6 @@
 
+
+
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useFinance } from '../context/FinanceContext';
@@ -117,9 +119,9 @@ export const Landing: React.FC = () => {
             >
                 <div className="flex items-center justify-center gap-3 mb-4">
                     <div className="w-8 h-8 bg-neon-green rotate-45" />
-                    <h1 className="text-3xl font-bold text-white tracking-widest">ORBITAL</h1>
+                    <h1 className="text-3xl font-bold text-content tracking-widest">ORBITAL</h1>
                 </div>
-                <p className="text-gray-500 font-mono text-xs uppercase tracking-[0.2em]">Decentralized Expense Telemetry</p>
+                <p className="text-muted font-mono text-xs uppercase tracking-[0.2em]">Decentralized Expense Telemetry</p>
             </motion.div>
         </div>
 
@@ -133,11 +135,11 @@ export const Landing: React.FC = () => {
                 >
                     <button 
                         onClick={() => setMode('LOGIN')}
-                        className="w-full group bg-surface hover:bg-surfaceHighlight border border-white/10 hover:border-neon-cyan/50 p-6 text-left transition-all duration-300 relative overflow-hidden"
+                        className="w-full group bg-surface hover:bg-surfaceHighlight border border-content/10 hover:border-neon-cyan/50 p-6 text-left transition-all duration-300 relative overflow-hidden"
                     >
                         <div className="absolute inset-0 bg-neon-cyan/5 translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-500" />
-                        <h3 className="text-white font-sans text-xl mb-1 relative z-10">Access Terminal</h3>
-                        <p className="text-gray-500 text-xs font-mono relative z-10">Login via Orbit Key or Credentials</p>
+                        <h3 className="text-content font-sans text-xl mb-1 relative z-10">Access Terminal</h3>
+                        <p className="text-muted text-xs font-mono relative z-10">Login via Orbit Key or Credentials</p>
                         <div className="absolute right-6 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
                             <ArrowRight className="text-neon-cyan" />
                         </div>
@@ -145,11 +147,11 @@ export const Landing: React.FC = () => {
 
                     <button 
                         onClick={() => setMode('SIGNUP')}
-                        className="w-full group bg-surface hover:bg-surfaceHighlight border border-white/10 hover:border-neon-green/50 p-6 text-left transition-all duration-300 relative overflow-hidden"
+                        className="w-full group bg-surface hover:bg-surfaceHighlight border border-content/10 hover:border-neon-green/50 p-6 text-left transition-all duration-300 relative overflow-hidden"
                     >
                          <div className="absolute inset-0 bg-neon-green/5 translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-500" />
-                        <h3 className="text-white font-sans text-xl mb-1 relative z-10">Initialize Identity</h3>
-                        <p className="text-gray-500 text-xs font-mono relative z-10">Create new secure ledger</p>
+                        <h3 className="text-content font-sans text-xl mb-1 relative z-10">Initialize Identity</h3>
+                        <p className="text-muted text-xs font-mono relative z-10">Create new secure ledger</p>
                         <div className="absolute right-6 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
                             <ArrowRight className="text-neon-green" />
                         </div>
@@ -158,7 +160,7 @@ export const Landing: React.FC = () => {
                     <div className="pt-4 flex justify-center">
                         <button 
                             onClick={fillDemo}
-                            className="flex items-center gap-2 text-gray-600 hover:text-neon-purple transition-colors text-xs font-mono uppercase tracking-wider"
+                            className="flex items-center gap-2 text-muted hover:text-neon-purple transition-colors text-xs font-mono uppercase tracking-wider"
                         >
                             <Terminal size={12} />
                             Launch Demo Mode
@@ -172,23 +174,23 @@ export const Landing: React.FC = () => {
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
-                    className="bg-surface border border-white/10 p-8 shadow-2xl"
+                    className="bg-surface border border-content/10 p-8 shadow-2xl"
                 >
                     <div className="flex justify-between items-center mb-6">
-                        <h2 className="text-xl text-white font-sans">Authenticate</h2>
-                        <button onClick={reset} className="text-xs font-mono text-gray-500 hover:text-white">BACK</button>
+                        <h2 className="text-xl text-content font-sans">Authenticate</h2>
+                        <button onClick={reset} className="text-xs font-mono text-muted hover:text-content">BACK</button>
                     </div>
 
                     <div className="flex gap-4 mb-6">
                         <button 
                             onClick={() => { setLoginMethod('CREDENTIALS'); setError(''); }}
-                            className={`flex-1 py-2 text-xs font-mono border-b-2 transition-colors ${loginMethod === 'CREDENTIALS' ? 'border-neon-cyan text-white' : 'border-transparent text-gray-600 hover:text-gray-400'}`}
+                            className={`flex-1 py-2 text-xs font-mono border-b-2 transition-colors ${loginMethod === 'CREDENTIALS' ? 'border-neon-cyan text-content' : 'border-transparent text-muted hover:text-content'}`}
                         >
                             Credentials
                         </button>
                         <button 
                             onClick={() => { setLoginMethod('KEY'); setError(''); }}
-                            className={`flex-1 py-2 text-xs font-mono border-b-2 transition-colors ${loginMethod === 'KEY' ? 'border-neon-cyan text-white' : 'border-transparent text-gray-600 hover:text-gray-400'}`}
+                            className={`flex-1 py-2 text-xs font-mono border-b-2 transition-colors ${loginMethod === 'KEY' ? 'border-neon-cyan text-content' : 'border-transparent text-muted hover:text-content'}`}
                         >
                             Orbit Key
                         </button>
@@ -198,42 +200,42 @@ export const Landing: React.FC = () => {
                         {loginMethod === 'CREDENTIALS' ? (
                             <>
                                 <div>
-                                    <label className="block text-[10px] font-mono text-gray-500 uppercase mb-1">Username</label>
+                                    <label className="block text-[10px] font-mono text-muted uppercase mb-1">Username</label>
                                     <input 
                                         type="text" 
                                         value={username}
                                         onChange={(e) => setUsername(e.target.value)}
-                                        className="w-full bg-black border border-white/10 p-3 text-white font-mono focus:border-neon-cyan focus:outline-none"
+                                        className="w-full bg-field border border-content/10 p-3 text-content font-mono focus:border-neon-cyan focus:outline-none"
                                         autoFocus
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-[10px] font-mono text-gray-500 uppercase mb-1">Password</label>
+                                    <label className="block text-[10px] font-mono text-muted uppercase mb-1">Password</label>
                                     <input 
                                         type="password" 
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
-                                        className="w-full bg-black border border-white/10 p-3 text-white font-mono focus:border-neon-cyan focus:outline-none"
+                                        className="w-full bg-field border border-content/10 p-3 text-content font-mono focus:border-neon-cyan focus:outline-none"
                                     />
                                 </div>
                             </>
                         ) : (
                             <div className="space-y-3">
                                 <div>
-                                    <label className="block text-[10px] font-mono text-gray-500 uppercase mb-1">Orbit Key Hash</label>
+                                    <label className="block text-[10px] font-mono text-muted uppercase mb-1">Orbit Key Hash</label>
                                     <textarea 
                                         value={orbitKeyInput}
                                         onChange={(e) => setOrbitKeyInput(e.target.value)}
-                                        className="w-full h-24 bg-black border border-white/10 p-3 text-white font-mono text-xs focus:border-neon-cyan focus:outline-none resize-none"
+                                        className="w-full h-24 bg-field border border-content/10 p-3 text-content font-mono text-xs focus:border-neon-cyan focus:outline-none resize-none"
                                         placeholder="Paste your key string here..."
                                         autoFocus
                                     />
                                 </div>
                                 
                                 <div className="flex items-center gap-3">
-                                    <div className="h-px bg-white/10 flex-1" />
-                                    <span className="text-[10px] text-gray-600 font-mono">OR</span>
-                                    <div className="h-px bg-white/10 flex-1" />
+                                    <div className="h-px bg-content/10 flex-1" />
+                                    <span className="text-[10px] text-muted font-mono">OR</span>
+                                    <div className="h-px bg-content/10 flex-1" />
                                 </div>
 
                                 <input 
@@ -274,33 +276,33 @@ export const Landing: React.FC = () => {
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
-                    className="bg-surface border border-white/10 p-8 shadow-2xl"
+                    className="bg-surface border border-content/10 p-8 shadow-2xl"
                 >
                     {!generatedKey ? (
                         <>
                              <div className="flex justify-between items-center mb-6">
-                                <h2 className="text-xl text-white font-sans">Establish Identity</h2>
-                                <button onClick={reset} className="text-xs font-mono text-gray-500 hover:text-white">BACK</button>
+                                <h2 className="text-xl text-content font-sans">Establish Identity</h2>
+                                <button onClick={reset} className="text-xs font-mono text-muted hover:text-content">BACK</button>
                             </div>
 
                             <form onSubmit={handleSignup} className="space-y-4">
                                 <div>
-                                    <label className="block text-[10px] font-mono text-gray-500 uppercase mb-1">Desired Username</label>
+                                    <label className="block text-[10px] font-mono text-muted uppercase mb-1">Desired Username</label>
                                     <input 
                                         type="text" 
                                         value={username}
                                         onChange={(e) => setUsername(e.target.value)}
-                                        className="w-full bg-black border border-white/10 p-3 text-white font-mono focus:border-neon-green focus:outline-none"
+                                        className="w-full bg-field border border-content/10 p-3 text-content font-mono focus:border-neon-green focus:outline-none"
                                         autoFocus
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-[10px] font-mono text-gray-500 uppercase mb-1">Secure Password</label>
+                                    <label className="block text-[10px] font-mono text-muted uppercase mb-1">Secure Password</label>
                                     <input 
                                         type="password" 
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
-                                        className="w-full bg-black border border-white/10 p-3 text-white font-mono focus:border-neon-green focus:outline-none"
+                                        className="w-full bg-field border border-content/10 p-3 text-content font-mono focus:border-neon-green focus:outline-none"
                                     />
                                 </div>
 
@@ -322,19 +324,19 @@ export const Landing: React.FC = () => {
                                     <ShieldCheck size={48} />
                                 </div>
                             </div>
-                            <h2 className="text-2xl text-white font-sans mb-2">Identity Secured</h2>
-                            <p className="text-gray-500 text-xs font-mono mb-6">
+                            <h2 className="text-2xl text-content font-sans mb-2">Identity Secured</h2>
+                            <p className="text-muted text-xs font-mono mb-6">
                                 Your unique Orbit Key has been generated. <br/>
                                 Store this file securely. It can be used to recover access.
                             </p>
 
-                            <div className="bg-black border border-white/10 p-4 rounded mb-6 relative group">
+                            <div className="bg-field border border-content/10 p-4 rounded mb-6 relative group">
                                 <code className="text-[10px] text-neon-green font-mono break-all leading-relaxed opacity-80">
                                     {generatedKey}
                                 </code>
                                 <button 
                                     onClick={copyToClipboard}
-                                    className="absolute top-2 right-2 p-1 bg-white/10 rounded hover:bg-white/20 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                                    className="absolute top-2 right-2 p-1 bg-content/10 rounded hover:bg-content/20 text-content opacity-0 group-hover:opacity-100 transition-opacity"
                                     title="Copy"
                                 >
                                     <Copy size={12} />

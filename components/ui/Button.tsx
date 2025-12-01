@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { motion, HTMLMotionProps } from 'framer-motion';
 
@@ -20,11 +21,11 @@ export const Button: React.FC<ButtonProps> = ({
   const baseStyles = "inline-flex items-center justify-center font-sans tracking-wide transition-all duration-200 border relative overflow-hidden group";
   
   const variants = {
-    primary: "bg-white text-black border-white hover:bg-gray-200",
-    secondary: "bg-surfaceHighlight text-white border-white/10 hover:border-white/30 hover:bg-surfaceHighlight/80",
+    primary: "bg-content text-void border-content hover:bg-gray-200 hover:text-black",
+    secondary: "bg-surfaceHighlight text-content border-content/10 hover:border-content/30 hover:bg-surfaceHighlight/80",
     danger: "bg-red-900/20 text-red-500 border-red-500/50 hover:bg-red-900/40",
-    ghost: "bg-transparent text-gray-400 hover:text-white border-transparent",
-    neon: "bg-neon-green/10 text-neon-green border-neon-green/50 hover:bg-neon-green hover:text-black hover:border-neon-green shadow-[0_0_15px_rgba(204,255,0,0.1)] hover:shadow-[0_0_20px_rgba(204,255,0,0.5)]"
+    ghost: "bg-transparent text-muted hover:text-content border-transparent",
+    neon: "bg-neon-green/10 text-neon-green border-neon-green/50 hover:bg-neon-green hover:text-black hover:border-neon-green shadow-[0_0_15px_rgba(var(--color-neon-green),0.1)] hover:shadow-[0_0_20px_rgba(var(--color-neon-green),0.5)]"
   };
 
   const sizes = {

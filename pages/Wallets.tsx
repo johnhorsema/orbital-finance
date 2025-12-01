@@ -1,5 +1,6 @@
 
 
+
 import React, { useState } from 'react';
 import { useFinance } from '../context/FinanceContext';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -37,7 +38,7 @@ export const Wallets: React.FC = () => {
     <div className="p-8 max-w-7xl mx-auto min-h-screen">
       <div className="flex justify-between items-center mb-12">
         <div>
-          <h1 className="text-4xl font-sans font-light text-white tracking-tighter">
+          <h1 className="text-4xl font-sans font-light text-content tracking-tighter">
             DIGITAL <span className="text-neon-purple font-bold">VAULT</span>
           </h1>
         </div>
@@ -54,7 +55,7 @@ export const Wallets: React.FC = () => {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: idx * 0.1 }}
             onClick={() => navigate(`/wallet/${wallet.id}`)}
-            className="group relative bg-surface border border-white/5 hover:border-white/20 transition-all duration-300 h-64 flex flex-col justify-between p-6 overflow-hidden cursor-pointer"
+            className="group relative bg-surface border border-content/5 hover:border-content/20 transition-all duration-300 h-64 flex flex-col justify-between p-6 overflow-hidden cursor-pointer"
           >
             {/* Background Glow */}
             <div 
@@ -63,29 +64,29 @@ export const Wallets: React.FC = () => {
             />
             
             <div className="flex justify-between items-start z-10">
-              <div className="p-3 bg-white/5 rounded-sm backdrop-blur-sm border border-white/5 text-white">
+              <div className="p-3 bg-content/5 rounded-sm backdrop-blur-sm border border-content/5 text-content">
                 <WalletIcon icon={wallet.icon} type={wallet.type} size={24} style={{ color: wallet.color }} />
               </div>
-              <span className="font-mono text-xs text-gray-500 border border-white/10 px-2 py-1 rounded-sm uppercase">
+              <span className="font-mono text-xs text-muted border border-content/10 px-2 py-1 rounded-sm uppercase">
                 {wallet.baseCurrency}
               </span>
             </div>
 
             <div className="z-10">
-               <h3 className="text-gray-400 font-sans text-sm mb-1">{wallet.name}</h3>
-               <div className="text-3xl font-mono font-bold text-white tracking-tighter">
+               <h3 className="text-muted font-sans text-sm mb-1">{wallet.name}</h3>
+               <div className="text-3xl font-mono font-bold text-content tracking-tighter">
                   {wallet.balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })}
                </div>
                
                {/* Approximate Global Value */}
                {wallet.baseCurrency !== globalCurrency && rates[wallet.baseCurrency.toLowerCase()] && (
-                 <div className="text-xs text-gray-600 font-mono mt-1">
+                 <div className="text-xs text-muted font-mono mt-1">
                    ≈ {(wallet.balance / rates[wallet.baseCurrency.toLowerCase()]).toFixed(2)} {globalCurrency}
                  </div>
                )}
             </div>
 
-            <div className="z-10 pt-4 border-t border-white/5 flex gap-2">
+            <div className="z-10 pt-4 border-t border-content/5 flex gap-2">
                 <Button size="sm" variant="secondary" className="w-full">Open Vault</Button>
             </div>
           </motion.div>
@@ -107,45 +108,45 @@ export const Wallets: React.FC = () => {
               initial={{ y: 50, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 50, opacity: 0 }}
-              className="bg-surface border border-white/10 p-8 w-full max-w-md relative z-10 shadow-2xl shadow-neon-purple/10"
+              className="bg-surface border border-content/10 p-8 w-full max-w-md relative z-10 shadow-2xl shadow-neon-purple/10"
             >
-               <button onClick={() => setIsAdding(false)} className="absolute top-4 right-4 text-gray-500 hover:text-white">
+               <button onClick={() => setIsAdding(false)} className="absolute top-4 right-4 text-muted hover:text-content">
                  <X size={24} />
                </button>
                
-               <h2 className="text-2xl font-sans text-white mb-6">Initialize Wallet</h2>
+               <h2 className="text-2xl font-sans text-content mb-6">Initialize Wallet</h2>
                
                <form onSubmit={handleCreate} className="space-y-6">
                  <div>
-                   <label className="block text-xs font-mono text-gray-400 mb-2 uppercase">Wallet Name</label>
+                   <label className="block text-xs font-mono text-muted mb-2 uppercase">Wallet Name</label>
                    <input 
                       type="text" 
                       required
                       value={newName}
                       onChange={(e) => setNewName(e.target.value)}
-                      className="w-full bg-black border border-white/10 p-3 text-white font-mono focus:border-neon-purple focus:outline-none transition-colors"
+                      className="w-full bg-field border border-content/10 p-3 text-content font-mono focus:border-neon-purple focus:outline-none transition-colors"
                       placeholder="e.g. Secret Swiss Bank"
                    />
                  </div>
 
                  <div className="grid grid-cols-2 gap-4">
                    <div>
-                      <label className="block text-xs font-mono text-gray-400 mb-2 uppercase">Type</label>
+                      <label className="block text-xs font-mono text-muted mb-2 uppercase">Type</label>
                       <select 
                         value={newType}
                         onChange={(e) => setNewType(e.target.value as any)}
-                        className="w-full bg-black border border-white/10 p-3 text-white font-mono focus:border-neon-purple focus:outline-none"
+                        className="w-full bg-field border border-content/10 p-3 text-content font-mono focus:border-neon-purple focus:outline-none"
                       >
                         <option value="FIAT">Fiat</option>
                         <option value="CRYPTO">Crypto</option>
                       </select>
                    </div>
                    <div>
-                      <label className="block text-xs font-mono text-gray-400 mb-2 uppercase">Currency</label>
+                      <label className="block text-xs font-mono text-muted mb-2 uppercase">Currency</label>
                       <select 
                         value={newCurrency}
                         onChange={(e) => setNewCurrency(e.target.value as any)}
-                        className="w-full bg-black border border-white/10 p-3 text-white font-mono focus:border-neon-purple focus:outline-none"
+                        className="w-full bg-field border border-content/10 p-3 text-content font-mono focus:border-neon-purple focus:outline-none"
                       >
                         {SUPPORTED_CURRENCIES.map(c => (
                           <option key={c} value={c}>{c}</option>

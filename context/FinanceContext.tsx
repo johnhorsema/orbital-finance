@@ -1,8 +1,9 @@
 
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import { AppState, Wallet, Transaction, CurrencyCode, DEFAULT_CATEGORIES, User } from '../types';
+import { AppState, Wallet, Transaction, CurrencyCode, DEFAULT_CATEGORIES, User, ThemeMode } from '../types';
 import { fetchExchangeRates, RateStatus } from '../services/currencyService';
 import { generateOrbitKey } from '../utils/crypto';
+import { generatePalette } from '../utils/themeGenerator';
 
 interface FinanceContextType {
   user: User | null;
@@ -10,6 +11,8 @@ interface FinanceContextType {
   rates: Record<string, number>;
   rateStatus: RateStatus;
   globalCurrency: CurrencyCode;
+  primaryColor: string;
+  themeMode: ThemeMode;
   
   // Auth Methods
   login: (identifier: string, password?: string) => Promise<boolean>;
@@ -33,6 +36,8 @@ interface FinanceContextType {
   exportData: () => string;
   refreshRates: () => Promise<void>;
   setGlobalCurrency: (c: CurrencyCode) => void;
+  setPrimaryColor: (color: string) => void;
+  toggleTheme: () => void;
   switchWallet: (id: string) => void;
 }
 
@@ -71,9 +76,49 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [globalCurrency, setGlobalCurrency] = useState<CurrencyCode>(() => {
     return (localStorage.getItem('orbital_global_currency') as CurrencyCode) || 'USD';
   });
+
+  const [primaryColor, setPrimaryColor] = useState<string>(() => {
+      return localStorage.getItem('orbital_primary_color') || '#CCFF00';
+  });
+
+  const [themeMode, setThemeMode] = useState<ThemeMode>(() => {
+    return (localStorage.getItem('orbital_theme_mode') as ThemeMode) || 'dark';
+  });
   
   const [rates, setRates] = useState<Record<string, number>>({});
   const [rateStatus, setRateStatus] = useState<RateStatus>({ source: 'primary', lastUpdated: null, base: 'usd' });
+
+  const toggleTheme = useCallback(() => {
+    setThemeMode(prev => prev === 'dark' ? 'light' : 'dark');
+  }, []);
+
+  // Apply Dynamic Theme Side Effect
+  useEffect(() => {
+    localStorage.setItem('orbital_primary_color', primaryColor);
+    localStorage.setItem('orbital_theme_mode', themeMode);
+    
+    // Generate palette from primary color and mode
+    const palette = generatePalette(primaryColor, themeMode);
+    const root = document.documentElement;
+
+    root.style.setProperty('--color-void', palette.void);
+    root.style.setProperty('--color-surface', palette.surface);
+    root.style.setProperty('--color-surface-highlight', palette.surfaceHighlight);
+    
+    // Semantic Colors
+    root.style.setProperty('--color-content', palette.content);
+    root.style.setProperty('--color-muted', palette.muted);
+    root.style.setProperty('--color-field', palette.field);
+    
+    // Primary Brand Color
+    root.style.setProperty('--color-neon-green', palette.neonGreen);
+    
+    // Secondary/Tertiary Accents
+    root.style.setProperty('--color-neon-purple', palette.neonPurple);
+    root.style.setProperty('--color-neon-cyan', palette.neonCyan);
+    root.style.setProperty('--color-neon-pink', palette.neonPink);
+    
+  }, [primaryColor, themeMode]);
 
   // Seed Demo User
   useEffect(() => {
@@ -215,7 +260,6 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     registry.push(newUser);
     localStorage.setItem('orbital_users_registry', JSON.stringify(registry));
     
-    // NOTE: Removed auto-login to allow user to download key on landing page first.
     return orbitKey;
   };
 
@@ -429,6 +473,8 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       rates,
       rateStatus,
       globalCurrency,
+      primaryColor,
+      themeMode,
       login,
       signup,
       logout,
@@ -445,6 +491,8 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       exportData,
       refreshRates,
       setGlobalCurrency,
+      setPrimaryColor,
+      toggleTheme,
       switchWallet: () => {} 
     }}>
       {children}
