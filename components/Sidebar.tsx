@@ -1,8 +1,7 @@
 
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Wallet, Radio, Settings, LogOut, BarChart3 } from 'lucide-react';
+import { LayoutDashboard, Wallet, Radio, Settings, LogOut, BarChart3, Repeat } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useFinance } from '../context/FinanceContext';
 
@@ -10,6 +9,7 @@ const NAV_ITEMS = [
   { path: '/', label: 'Overview', icon: <LayoutDashboard size={20} /> },
   { path: '/wallets', label: 'Wallets', icon: <Wallet size={20} /> },
   { path: '/analytics', label: 'Analytics', icon: <BarChart3 size={20} /> },
+  { path: '/recurring', label: 'Recurring', icon: <Repeat size={20} /> },
   { path: '/exchange', label: 'Exchange Rates', icon: <Radio size={20} /> },
   { path: '/settings', label: 'Data & Settings', icon: <Settings size={20} /> },
 ];

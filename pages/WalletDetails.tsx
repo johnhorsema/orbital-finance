@@ -1,11 +1,9 @@
 
-
-
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useFinance } from '../context/FinanceContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, ArrowRightLeft, TrendingUp, X, Filter, MoreVertical, Trash2, Edit, Save, PieChart as PieChartIcon, Plus } from 'lucide-react';
+import { ArrowLeft, ArrowRightLeft, TrendingUp, X, Filter, MoreVertical, Trash2, Edit, Save, PieChart as PieChartIcon, Plus, Search } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { TransactionDetailsModal } from '../components/TransactionDetailsModal';
 import { Transaction, CurrencyCode, SUPPORTED_CURRENCIES } from '../types';
@@ -27,6 +25,10 @@ export const WalletDetails: React.FC = () => {
   const [isEditingWallet, setIsEditingWallet] = useState(false);
   const [chartTab, setChartTab] = useState<'EXPENSE' | 'INCOME'>('EXPENSE');
   
+  // Search & Filter State
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterType, setFilterType] = useState<'ALL' | 'INCOME' | 'EXPENSE'>('ALL');
+
   // Wallet Edit State
   const [editName, setEditName] = useState('');
   const [editColor, setEditColor] = useState('');
@@ -56,10 +58,19 @@ export const WalletDetails: React.FC = () => {
   const transactions = useMemo(() => {
     return state.transactions
       .filter(t => t.walletId === id)
+      .filter(t => {
+          const matchesSearch = t.description.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                                t.category.toLowerCase().includes(searchTerm.toLowerCase());
+          const matchesType = filterType === 'ALL' || t.type === filterType;
+          return matchesSearch && matchesType;
+      })
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  }, [state.transactions, id]);
+  }, [state.transactions, id, searchTerm, filterType]);
 
   const categoryStats = useMemo(() => {
+    // Note: Stats should probably reflect All transactions, not just filtered ones, 
+    // unless we want charts to update with filter. Let's make charts static for the wallet, 
+    // and only filter the list. Or updating charts is cool too. Let's update charts based on filtered data.
     const income: Record<string, number> = {};
     const expense: Record<string, number> = {};
 
@@ -458,12 +469,36 @@ export const WalletDetails: React.FC = () => {
           </div>
       </div>
 
-      {/* Transaction History */}
+      {/* Transaction History with Search & Filter */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between border-b border-content/5 pb-4">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-content/5 pb-4 gap-4">
             <h3 className="text-lg font-sans text-content">Ledger</h3>
-            <div className="flex gap-2">
-                {/* Future filter implementation */}
+            
+            <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
+                 {/* Search Input */}
+                 <div className="relative flex-1 md:w-64">
+                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" size={14} />
+                     <input 
+                         type="text" 
+                         placeholder="Filter transactions..." 
+                         value={searchTerm}
+                         onChange={(e) => setSearchTerm(e.target.value)}
+                         className="w-full bg-surfaceHighlight border border-content/10 pl-9 pr-3 py-2 text-xs font-mono text-content focus:border-neon-cyan focus:outline-none rounded-sm"
+                     />
+                 </div>
+                 
+                 {/* Type Filter */}
+                 <div className="flex rounded-sm overflow-hidden border border-content/10">
+                     {['ALL', 'INCOME', 'EXPENSE'].map(type => (
+                         <button
+                             key={type}
+                             onClick={() => setFilterType(type as any)}
+                             className={`px-3 py-2 text-[10px] font-mono font-bold transition-colors ${filterType === type ? 'bg-content text-void' : 'bg-field text-muted hover:text-content'}`}
+                         >
+                             {type}
+                         </button>
+                     ))}
+                 </div>
             </div>
         </div>
         
@@ -496,7 +531,7 @@ export const WalletDetails: React.FC = () => {
                 </motion.div>
             ))}
             {transactions.length === 0 && (
-                <div className="py-12 text-center text-muted font-mono">No transactions found.</div>
+                <div className="py-12 text-center text-muted font-mono">No transactions found matching your filters.</div>
             )}
         </div>
       </div>

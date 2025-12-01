@@ -32,6 +32,24 @@ export interface Transaction {
   description: string;
 }
 
+export type RecurrenceFrequency = 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY';
+
+export interface RecurringTransaction {
+  id: string;
+  userId: string;
+  walletId: string;
+  amount: number;
+  currency: CurrencyCode;
+  type: 'INCOME' | 'EXPENSE';
+  category: string;
+  description: string;
+  frequency: RecurrenceFrequency;
+  startDate: string;
+  nextDueDate: string;
+  active: boolean;
+  lastRunDate?: string;
+}
+
 export interface User {
   id: string;
   username: string;
@@ -42,12 +60,13 @@ export interface AppState {
   wallets: Wallet[];
   transactions: Transaction[];
   categories: string[];
+  recurring: RecurringTransaction[];
 }
 
 export const SUPPORTED_CURRENCIES: CurrencyCode[] = ['USD', 'EUR', 'GBP', 'JPY', 'CAD', 'HKD', 'SGD', 'KRW', 'THB', 'IDR', 'BTC', 'ETH', 'SOL'];
 
 export const DEFAULT_CATEGORIES = [
-  'Travel', 'Food', 'Housing', 'Tech', 'Crypto', 'Freelance', 'Salary', 'Transport', 'Utilities', 'Entertainment', 'Transfer'
+  'Travel', 'Food', 'Housing', 'Tech', 'Crypto', 'Freelance', 'Salary', 'Transport', 'Utilities', 'Entertainment', 'Transfer', 'Subscription'
 ];
 
 // --- Theme Definitions ---

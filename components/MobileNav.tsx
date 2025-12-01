@@ -1,14 +1,14 @@
 
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Wallet, Radio, Settings, BarChart3 } from 'lucide-react';
+import { LayoutDashboard, Wallet, Radio, Settings, BarChart3, Repeat } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const NAV_ITEMS = [
   { path: '/', label: 'Overview', icon: <LayoutDashboard size={20} /> },
   { path: '/wallets', label: 'Wallets', icon: <Wallet size={20} /> },
-  { path: '/analytics', label: 'Analytics', icon: <BarChart3 size={20} /> },
-  { path: '/exchange', label: 'Rates', icon: <Radio size={20} /> },
+  { path: '/analytics', label: 'Stats', icon: <BarChart3 size={20} /> },
+  { path: '/recurring', label: 'Auto', icon: <Repeat size={20} /> },
   { path: '/settings', label: 'Config', icon: <Settings size={20} /> },
 ];
 

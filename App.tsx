@@ -1,8 +1,5 @@
 
 
-
-
-
 import React from 'react';
 import { HashRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { FinanceProvider, useFinance } from './context/FinanceContext';
@@ -16,6 +13,7 @@ import { Settings } from './pages/Settings';
 import { Activity } from './pages/Activity';
 import { Landing } from './pages/Landing';
 import { Analytics } from './pages/Analytics';
+import { Recurring } from './pages/Recurring';
 import { WalletSwitcher } from './components/WalletSwitcher';
 import { AnimatePresence } from 'framer-motion';
 
@@ -65,6 +63,7 @@ const ProtectedLayout: React.FC = () => {
                       <Route path="/wallets" element={<Wallets />} />
                       <Route path="/wallet/:id" element={<WalletDetails />} />
                       <Route path="/analytics" element={<Analytics />} />
+                      <Route path="/recurring" element={<Recurring />} />
                       <Route path="/exchange" element={<ExchangeStatus />} />
                       <Route path="/settings" element={<Settings />} />
                       <Route path="/activity" element={<Activity />} />
