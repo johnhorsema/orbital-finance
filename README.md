@@ -22,6 +22,16 @@ Unlike traditional finance apps that lock you into a single currency or boring s
 
 ---
 
+## 📸 Screenshots
+
+### Overview
+![Overview](/screenshots/overview.png)
+
+### Exchange Rate
+![Overview](/screenshots/exchannge-rates.png)
+
+---
+
 ## 🛠 Tech Stack
 
 - **Core**: [React 19](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/)
@@ -117,9 +127,9 @@ We welcome contributions from the community! Whether it's a bug fix, a new featu
 ## 🗺 Roadmap
 
 - [ ] **Backend Sync**: Optional integration with Drizzle ORM + Postgres for cross-device sync.
-- [ ] **Visualizations**: Heatmaps for spending habits.
 - [ ] **Budgeting**: Monthly caps per category with visual alerts.
 - [ ] **More Chains**: Integration with live on-chain data for wallet balances.
+- [x] **Visualizations**: Heatmaps for spending habits.
 
 ---
 
