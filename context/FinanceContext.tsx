@@ -9,6 +9,7 @@ interface FinanceContextType {
   user: User | null;
   state: AppState;
   rates: Record<string, number>;
+  previousRates: Record<string, number>;
   rateStatus: RateStatus;
   globalCurrency: CurrencyCode;
   primaryColor: string;
@@ -87,7 +88,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   });
 
   const [primaryColor, setPrimaryColor] = useState<string>(() => {
-      return localStorage.getItem('orbital_primary_color') || '#CCFF00';
+      return localStorage.getItem('orbital_primary_color') || '#3B82F6'; // Electric Blue
   });
 
   const [themeMode, setThemeMode] = useState<ThemeMode>(() => {
@@ -95,6 +96,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   });
   
   const [rates, setRates] = useState<Record<string, number>>({});
+  const [previousRates, setPreviousRates] = useState<Record<string, number>>({});
   const [rateStatus, setRateStatus] = useState<RateStatus>({ source: 'primary', lastUpdated: null, base: 'usd' });
 
   const toggleTheme = useCallback(() => {
@@ -110,22 +112,30 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const palette = generatePalette(primaryColor, themeMode);
     const root = document.documentElement;
 
-    root.style.setProperty('--color-void', palette.void);
-    root.style.setProperty('--color-surface', palette.surface);
-    root.style.setProperty('--color-surface-highlight', palette.surfaceHighlight);
+    // Background colors
+    root.style.setProperty('--color-bg-primary', palette.bgPrimary);
+    root.style.setProperty('--color-bg-surface', palette.bgSurface);
+    root.style.setProperty('--color-bg-surface-highlight', palette.bgSurfaceHighlight);
+    root.style.setProperty('--color-bg-subtle', palette.bgSubtle);
     
-    // Semantic Colors
-    root.style.setProperty('--color-content', palette.content);
-    root.style.setProperty('--color-muted', palette.muted);
-    root.style.setProperty('--color-field', palette.field);
+    // Text colors
+    root.style.setProperty('--color-text-primary', palette.textPrimary);
+    root.style.setProperty('--color-text-secondary', palette.textSecondary);
+    root.style.setProperty('--color-text-tertiary', palette.textTertiary);
     
-    // Primary Brand Color
-    root.style.setProperty('--color-neon-green', palette.neonGreen);
+    // Accent colors
+    root.style.setProperty('--color-accent', palette.accent);
+    root.style.setProperty('--color-accent-hover', palette.accentHover);
+    root.style.setProperty('--color-accent-subtle', palette.accentSubtle);
     
-    // Secondary/Tertiary Accents
-    root.style.setProperty('--color-neon-purple', palette.neonPurple);
-    root.style.setProperty('--color-neon-cyan', palette.neonCyan);
-    root.style.setProperty('--color-neon-pink', palette.neonPink);
+    // Semantic colors
+    root.style.setProperty('--color-positive', palette.positive);
+    root.style.setProperty('--color-negative', palette.negative);
+    root.style.setProperty('--color-warning', palette.warning);
+    
+    // Border colors
+    root.style.setProperty('--color-border', palette.border);
+    root.style.setProperty('--color-border-strong', palette.borderStrong);
     
   }, [primaryColor, themeMode]);
 
@@ -370,7 +380,10 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const refreshRates = useCallback(async () => {
-    const result = await fetchExchangeRates(globalCurrency);
+    // Store current rates as previous before fetching new ones
+    setPreviousRates(currentRates => ({ ...currentRates }));
+    
+    const result = await fetchExchangeRates(globalCurrency, true); // Force refresh to bypass cache
     if (result.status.source !== 'error') {
       setRates(result.rates);
       setRateStatus(result.status);
@@ -599,6 +612,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       user,
       state,
       rates,
+      previousRates,
       rateStatus,
       globalCurrency,
       primaryColor,

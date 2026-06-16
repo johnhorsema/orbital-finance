@@ -1,30 +1,25 @@
 import React, { useMemo, useState } from 'react';
 import { useFinance } from '../context/FinanceContext';
-import { motion } from 'framer-motion';
-import { Calendar, ChevronLeft, ChevronRight, Grid3X3, Flame } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, Grid3X3 } from 'lucide-react';
 import { CurrencyCode } from '../types';
+
+const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 export const Analytics: React.FC = () => {
   const { state, rates, globalCurrency } = useFinance();
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [hoveredCell, setHoveredCell] = useState<{ type: 'daily' | 'category', data: any } | null>(null);
 
-  // Helper: Convert to global currency (Logic duplicated from Dashboard to keep component isolated)
   const getGlobalValue = (val: number, curr: CurrencyCode) => {
     if (curr === globalCurrency) return val;
     const rate = rates[curr.toLowerCase()];
     return rate ? val / rate : 0;
   };
 
-  // ---------------------------------------------------------------------------
-  // Data Processing
-  // ---------------------------------------------------------------------------
-
-  // 1. Get all expenses
   const expenses = useMemo(() => {
     return state.transactions.filter(t => t.type === 'EXPENSE');
   }, [state.transactions]);
 
-  // 2. Aggregate by Date (YYYY-MM-DD)
   const dailyData = useMemo(() => {
     const map: Record<string, number> = {};
     expenses.forEach(tx => {
@@ -35,7 +30,6 @@ export const Analytics: React.FC = () => {
     return map;
   }, [expenses, rates, globalCurrency]);
 
-  // 3. Aggregate by Category & Month (0-11) for current selected year
   const categoryMatrix = useMemo(() => {
      const map: Record<string, number[]> = {};
      state.categories.forEach(cat => {
@@ -53,7 +47,6 @@ export const Analytics: React.FC = () => {
          }
      });
 
-     // Filter out categories with 0 spend in the whole year to keep UI clean
      const filtered: Record<string, number[]> = {};
      Object.entries(map).forEach(([cat, months]) => {
          if (months.some(v => v > 0)) filtered[cat] = months;
@@ -62,7 +55,6 @@ export const Analytics: React.FC = () => {
      return filtered;
   }, [expenses, selectedYear, rates, globalCurrency, state.categories]);
 
-  // Calculate Max Values for scaling intensity
   const maxDailySpend = useMemo(() => {
      const values = Object.values(dailyData) as number[];
      return values.length > 0 ? Math.max(...values) : 1;
@@ -70,34 +62,21 @@ export const Analytics: React.FC = () => {
 
   const maxCategorySpend = useMemo(() => {
       let max = 0;
-      const values = Object.values(categoryMatrix) as number[][];
-      values.forEach(months => {
+      Object.values(categoryMatrix).forEach((months: number[]) => {
           months.forEach(v => {
               if (v > max) max = v;
           });
       });
       return max || 1;
   }, [categoryMatrix]);
-
-
-  // ---------------------------------------------------------------------------
-  // Heatmap Grid Logic
-  // ---------------------------------------------------------------------------
   
-  // Generate Days for the Selected Year
   const calendarGrid = useMemo(() => {
-      const days = [];
+      const days: (Date | null)[] = [];
       const startDate = new Date(selectedYear, 0, 1);
       const endDate = new Date(selectedYear, 11, 31);
       
-      // Pad beginning if year doesn't start on Sunday (0)
-      // Note: We'll render Sunday as row 0
-      const startDay = startDate.getDay(); // 0 (Sun) - 6 (Sat)
+      const startDay = startDate.getDay();
       
-      // We need a grid of 7 rows (days) x 53 cols (weeks)
-      // We will generate a flat array and use CSS Grid with grid-auto-flow: column
-      
-      // Pre-fill empty slots for previous year days in the first week
       for (let i = 0; i < startDay; i++) {
           days.push(null); 
       }
@@ -111,85 +90,84 @@ export const Analytics: React.FC = () => {
       return days;
   }, [selectedYear]);
 
-  // Color Scale Helper (Pink/Red for Expenses)
-  const getIntensityColor = (value: number, max: number, type: 'daily' | 'matrix') => {
-      if (value === 0) return 'bg-content/5';
+  const getHeatColor = (value: number, max: number) => {
+      if (value === 0) return 'var(--color-bg-surface)';
       const ratio = value / max;
       
-      // Using opacity stops for neon pink
-      if (ratio < 0.2) return 'bg-neon-pink/20';
-      if (ratio < 0.4) return 'bg-neon-pink/40';
-      if (ratio < 0.6) return 'bg-neon-pink/60';
-      if (ratio < 0.8) return 'bg-neon-pink/80';
-      return 'bg-neon-pink shadow-[0_0_10px_rgba(var(--color-neon-pink),0.5)]';
+      // Extract hue from accent color CSS variable
+      const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--color-accent').trim();
+      const hueMatch = accentColor.match(/oklch\([\d.]+\s+[\d.]+\s+([\d.]+)\)/);
+      const hue = hueMatch ? parseFloat(hueMatch[1]) : 250; // Default to 250 (blue)
+      
+      // Generate heatmap colors using theme hue with varying lightness and chroma
+      if (ratio < 0.2) return `oklch(0.45 0.08 ${hue})`;
+      if (ratio < 0.4) return `oklch(0.50 0.12 ${hue})`;
+      if (ratio < 0.6) return `oklch(0.55 0.15 ${hue})`;
+      if (ratio < 0.8) return `oklch(0.60 0.17 ${hue})`;
+      return `oklch(0.62 0.18 ${hue})`;
   };
 
-  const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const formatCurrency = (val: number) => {
+    return `${val.toFixed(2)} ${globalCurrency}`;
+  };
 
   return (
     <div className="p-8 max-w-7xl mx-auto pb-24">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-6">
         <div>
-          <h1 className="text-4xl font-sans font-light text-content tracking-tighter">
-            SPENDING <span className="text-neon-pink font-bold">THERMOGRAPHY</span>
+          <h1 className="text-3xl md:text-5xl font-sans font-medium tracking-tight text-text-primary">
+            Spending Analysis
           </h1>
-          <p className="text-muted mt-2 font-mono">
-            Visualizing capital outflow intensity across temporal and categorical vectors.
+          <p className="text-text-secondary mt-2 font-mono text-sm">
+            Expense patterns across time and categories for {selectedYear}
           </p>
         </div>
         
-        {/* Year Selector */}
-        <div className="flex items-center gap-4 bg-surface border border-content/10 rounded-sm p-1">
+        <div className="flex items-center gap-1 bg-bg-surface border border-border">
             <button 
                 onClick={() => setSelectedYear(prev => prev - 1)}
-                className="p-2 hover:bg-content/5 rounded-sm text-muted hover:text-content transition-colors"
+                className="p-2 hover:bg-bg-surface-highlight text-text-secondary hover:text-text-primary transition-colors duration-150"
+                aria-label="Previous year"
             >
                 <ChevronLeft size={16} />
             </button>
-            <span className="font-mono font-bold text-lg w-16 text-center">{selectedYear}</span>
+            <span className="font-mono font-medium text-text-primary w-16 text-center">{selectedYear}</span>
             <button 
                 onClick={() => setSelectedYear(prev => prev + 1)}
-                className="p-2 hover:bg-content/5 rounded-sm text-muted hover:text-content transition-colors"
+                className="p-2 hover:bg-bg-surface-highlight text-text-secondary hover:text-text-primary transition-colors duration-150 disabled:opacity-40 disabled:pointer-events-none"
                 disabled={selectedYear >= new Date().getFullYear()}
+                aria-label="Next year"
             >
                 <ChevronRight size={16} />
             </button>
         </div>
       </div>
 
-      {/* 1. CALENDAR HEATMAP */}
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-surface border border-content/10 p-6 md:p-8 mb-8 overflow-hidden"
-      >
-         <div className="flex items-center gap-3 mb-6">
-             <Calendar className="text-neon-pink" size={20} />
-             <h2 className="text-xl font-sans text-content">Daily Intensity Log</h2>
+      <div className="bg-bg-surface border border-border p-6 mb-8">
+         <div className="flex items-center gap-2 mb-6">
+             <Calendar className="text-text-secondary" size={18} />
+             <h2 className="text-lg font-sans font-medium text-text-primary">Daily Spending Heatmap</h2>
          </div>
          
-         <div className="overflow-x-auto pb-4 custom-scrollbar">
+         <div className="overflow-x-auto">
              <div className="min-w-[800px]">
-                 {/* Month Labels aligned approx */}
                  <div className="flex mb-2 pl-8">
-                     {MONTH_LABELS.map(m => (
-                         <div key={m} className="flex-1 text-xs font-mono text-muted">{m}</div>
+                     {MONTH_LABELS.map((m, i) => (
+                         <div key={m} className="flex-1 text-xs font-mono text-text-secondary" style={{ marginLeft: i > 0 ? '0' : '0' }}>{m}</div>
                      ))}
                  </div>
                  
-                 <div className="flex gap-2">
-                     {/* Day Rows Labels */}
-                     <div className="flex flex-col justify-between text-[10px] font-mono text-muted py-[2px] h-[140px] w-6">
-                         <span>Mon</span>
-                         <span>Wed</span>
-                         <span>Fri</span>
+                 <div className="flex gap-3">
+                     <div className="flex flex-col justify-between text-[10px] font-mono text-text-secondary py-1 h-[112px] w-7">
+                         <span>Sun</span>
+                         <span>Tue</span>
+                         <span>Thu</span>
+                         <span>Sat</span>
                      </div>
                      
-                     {/* The Grid */}
-                     <div className="flex-1 grid grid-rows-7 grid-flow-col gap-[3px] h-[140px]">
+                     <div className="flex-1 grid grid-rows-7 grid-flow-col gap-1 h-[112px]">
                          {calendarGrid.map((date, i) => {
-                             if (!date) return <div key={`empty-${i}`} className="w-3 h-3 md:w-4 md:h-4 bg-transparent" />;
+                             if (!date) return <div key={`empty-${i}`} className="w-3 h-3 bg-transparent" />;
                              
                              const dateStr = date.toISOString().split('T')[0];
                              const value = dailyData[dateStr] || 0;
@@ -197,91 +175,125 @@ export const Analytics: React.FC = () => {
                              return (
                                  <div 
                                     key={dateStr}
-                                    className={`w-3 h-3 md:w-4 md:h-4 rounded-[1px] transition-all hover:scale-125 hover:z-10 relative group ${getIntensityColor(value, maxDailySpend, 'daily')}`}
-                                 >
-                                     {/* Tooltip */}
-                                     <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-20 whitespace-nowrap bg-surfaceHighlight border border-content/10 p-2 text-xs font-mono text-content shadow-xl">
-                                         <div className="font-bold">{date.toLocaleDateString()}</div>
-                                         <div>{value > 0 ? `-${value.toFixed(2)} ${globalCurrency}` : 'No Spend'}</div>
-                                     </div>
-                                 </div>
+                                    onMouseEnter={() => setHoveredCell({ type: 'daily', data: { date, value } })}
+                                    onMouseLeave={() => setHoveredCell(null)}
+                                    className="w-3 h-3 transition-all duration-150 hover:scale-150 hover:z-10 cursor-pointer"
+                                    style={{ 
+                                        backgroundColor: getHeatColor(value, maxDailySpend),
+                                    }}
+                                 />
                              );
                          })}
                      </div>
                  </div>
                  
-                 {/* Legend */}
-                 <div className="flex justify-end items-center gap-2 mt-4 text-[10px] font-mono text-muted">
-                     <span>Less</span>
-                     <div className="flex gap-1">
-                         <div className="w-3 h-3 bg-content/5 rounded-[1px]" />
-                         <div className="w-3 h-3 bg-neon-pink/20 rounded-[1px]" />
-                         <div className="w-3 h-3 bg-neon-pink/40 rounded-[1px]" />
-                         <div className="w-3 h-3 bg-neon-pink/60 rounded-[1px]" />
-                         <div className="w-3 h-3 bg-neon-pink/80 rounded-[1px]" />
-                         <div className="w-3 h-3 bg-neon-pink rounded-[1px]" />
+                 <div className="flex justify-between items-center mt-4 pt-4 border-t border-border">
+                     <div className="text-xs font-mono text-text-secondary">
+                         {Object.keys(dailyData).length > 0 
+                             ? `${Object.keys(dailyData).length} days with expenses`
+                             : 'No expense data for this year'
+                         }
                      </div>
-                     <span>More</span>
+                     <div className="flex items-center gap-2 text-xs font-mono text-text-secondary">
+                         <span>Less</span>
+                         <div className="flex gap-1">
+                             <div className="w-3 h-3" style={{ backgroundColor: 'var(--color-bg-surface)' }} />
+                             <div className="w-3 h-3" style={{ backgroundColor: getHeatColor(0.1, 1) }} />
+                             <div className="w-3 h-3" style={{ backgroundColor: getHeatColor(0.3, 1) }} />
+                             <div className="w-3 h-3" style={{ backgroundColor: getHeatColor(0.5, 1) }} />
+                             <div className="w-3 h-3" style={{ backgroundColor: getHeatColor(0.7, 1) }} />
+                             <div className="w-3 h-3" style={{ backgroundColor: getHeatColor(0.9, 1) }} />
+                         </div>
+                         <span>More</span>
+                     </div>
                  </div>
              </div>
          </div>
-      </motion.div>
+      </div>
 
-      {/* 2. CATEGORY MATRIX */}
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="bg-surface border border-content/10 p-6 md:p-8"
-      >
-         <div className="flex items-center gap-3 mb-6">
-             <Grid3X3 className="text-neon-cyan" size={20} />
-             <h2 className="text-xl font-sans text-content">Category Flux Matrix</h2>
+      <div className="bg-bg-surface border border-border p-6">
+         <div className="flex items-center gap-2 mb-6">
+             <Grid3X3 className="text-text-secondary" size={18} />
+             <h2 className="text-lg font-sans font-medium text-text-primary">Category Breakdown by Month</h2>
          </div>
 
          {Object.keys(categoryMatrix).length === 0 ? (
-             <div className="text-center py-12 text-muted font-mono text-sm border border-dashed border-content/10">
-                 No spending data available for {selectedYear}
+             <div className="text-center py-16 border border-dashed border-border">
+                 <p className="text-text-secondary font-mono text-sm">
+                     No expense data for {selectedYear}
+                 </p>
+                 <p className="text-text-tertiary text-xs mt-2 font-mono">
+                     Add transactions to see spending patterns
+                 </p>
              </div>
          ) : (
-            <div className="overflow-x-auto pb-4">
-                <table className="w-full text-left border-collapse">
+            <div className="overflow-x-auto">
+                <table className="w-full border-collapse">
                     <thead>
                         <tr>
-                            <th className="p-2 text-xs font-mono text-muted uppercase font-normal w-32 border-b border-content/5">Category</th>
+                            <th className="p-3 text-xs font-mono text-text-secondary text-left font-normal border-b border-border w-40">Category</th>
                             {MONTH_LABELS.map(m => (
-                                <th key={m} className="p-2 text-xs font-mono text-muted text-center font-normal border-b border-content/5">{m}</th>
+                                <th key={m} className="p-2 text-xs font-mono text-text-secondary text-center font-normal border-b border-border">{m.substring(0, 1)}</th>
                             ))}
+                            <th className="p-3 text-xs font-mono text-text-secondary text-right font-normal border-b border-border">Total</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {(Object.entries(categoryMatrix) as [string, number[]][]).map(([category, months], i) => (
-                            <tr key={category} className="group hover:bg-content/5 transition-colors">
-                                <td className="p-3 text-sm font-sans font-bold text-content border-b border-content/5 group-hover:border-transparent">
-                                    {category}
-                                </td>
-                                {months.map((val, mIndex) => (
-                                    <td key={mIndex} className="p-1 border-b border-content/5 group-hover:border-transparent">
-                                        <div className="h-full w-full flex items-center justify-center py-2 relative group/cell">
-                                            <div 
-                                                className={`w-full h-8 rounded-sm transition-all ${getIntensityColor(val, maxCategorySpend, 'matrix')}`}
-                                                style={{ opacity: val === 0 ? 0.3 : 1 }}
-                                            />
-                                            {val > 0 && (
-                                                <div className="absolute -top-8 bg-black/90 text-white text-[10px] p-1 px-2 rounded opacity-0 group-hover/cell:opacity-100 pointer-events-none whitespace-nowrap z-10 font-mono">
-                                                    {val.toFixed(0)}
-                                                </div>
-                                            )}
-                                        </div>
+                        {(Object.entries(categoryMatrix) as [string, number[]][]).map(([category, months]) => {
+                            const categoryTotal = months.reduce((sum, val) => sum + val, 0);
+                            return (
+                                <tr key={category} className="hover:bg-bg-surface-highlight transition-colors duration-150">
+                                    <td className="p-3 text-sm font-sans font-medium text-text-primary border-b border-border">
+                                        {category}
                                     </td>
-                                ))}
-                            </tr>
-                        ))}
+                                    {months.map((val, mIndex) => (
+                                        <td key={mIndex} className="p-1 border-b border-border">
+                                            <div 
+                                                className="w-full h-7 transition-all duration-150 cursor-pointer"
+                                                onMouseEnter={() => setHoveredCell({ type: 'category', data: { category, month: MONTH_LABELS[mIndex], value: val } })}
+                                                onMouseLeave={() => setHoveredCell(null)}
+                                                style={{ 
+                                                    backgroundColor: val === 0 ? 'var(--color-bg-primary)' : getHeatColor(val, maxCategorySpend),
+                                                    opacity: val === 0 ? 0.5 : 1
+                                                }}
+                                            />
+                                        </td>
+                                    ))}
+                                    <td className="p-3 text-sm font-mono text-text-primary text-right border-b border-border">
+                                        {formatCurrency(categoryTotal)}
+                                    </td>
+                                </tr>
+                            );
+                        })}
                     </tbody>
                 </table>
             </div>
          )}
-      </motion.div>
+      </div>
+
+      {hoveredCell && (
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 bg-bg-surface-highlight border border-border-strong px-4 py-3 z-50">
+            {hoveredCell.type === 'daily' ? (
+                <div className="font-mono text-sm">
+                    <div className="text-text-primary font-medium">
+                        {hoveredCell.data.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    </div>
+                    <div className="text-text-secondary mt-1">
+                        {hoveredCell.data.value > 0 ? formatCurrency(hoveredCell.data.value) : 'No expenses'}
+                    </div>
+                </div>
+            ) : (
+                <div className="font-mono text-sm">
+                    <div className="text-text-primary font-medium">
+                        {hoveredCell.data.category}
+                    </div>
+                    <div className="text-text-secondary mt-1">
+                        {hoveredCell.data.month}: {formatCurrency(hoveredCell.data.value)}
+                    </div>
+                </div>
+            )}
+        </div>
+      )}
     </div>
   );
 };

@@ -19,11 +19,11 @@ export interface RateStatus {
  * Note: The free API usually provides rates relative to a specific base or lists all currencies.
  * The endpoint structure is /currencies/{currencyCode}.json
  */
-export const fetchExchangeRates = async (base: string): Promise<{ rates: Record<string, number>; status: RateStatus }> => {
+export const fetchExchangeRates = async (base: string, forceRefresh: boolean = false): Promise<{ rates: Record<string, number>; status: RateStatus }> => {
   const normalizedBase = base.toLowerCase();
   
-  // Check Cache
-  if (rateCache[normalizedBase]) {
+  // Check Cache (skip if forceRefresh is true)
+  if (!forceRefresh && rateCache[normalizedBase]) {
     const { data, timestamp } = rateCache[normalizedBase];
     if (Date.now() - timestamp < CACHE_DURATION) {
       return { 

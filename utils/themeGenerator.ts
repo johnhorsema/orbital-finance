@@ -1,8 +1,8 @@
 
 // Color conversion utilities
 
-// Convert Hex to RGB Object
-export const hexToRgbObj = (hex: string): { r: number; g: number; b: number } | null => {
+// Convert Hex to RGB
+export const hexToRgb = (hex: string): { r: number; g: number; b: number } | null => {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
   return result
     ? {
@@ -13,106 +13,132 @@ export const hexToRgbObj = (hex: string): { r: number; g: number; b: number } | 
     : null;
 };
 
-// Convert RGB to HSL
-export const rgbToHsl = (r: number, g: number, b: number): { h: number; s: number; l: number } => {
+// Convert RGB to OKLCH (simplified approximation)
+// For production, use a proper OKLCH library
+const rgbToOklch = (r: number, g: number, b: number): { l: number; c: number; h: number } => {
+  // Normalize RGB to 0-1
   r /= 255;
   g /= 255;
   b /= 255;
-  const max = Math.max(r, g, b);
-  const min = Math.min(r, g, b);
-  let h = 0, s = 0, l = (max + min) / 2;
-
-  if (max !== min) {
-    const d = max - min;
-    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-    switch (max) {
-      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-      case g: h = (b - r) / d + 2; break;
-      case b: h = (r - g) / d + 4; break;
-    }
-    h /= 6;
-  }
-
-  return { h: h * 360, s: s * 100, l: l * 100 };
+  
+  // Convert to linear RGB
+  const linearize = (v: number) => v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+  const rl = linearize(r);
+  const gl = linearize(g);
+  const bl = linearize(b);
+  
+  // Convert to XYZ (D65)
+  const x = rl * 0.4124564 + gl * 0.3575761 + bl * 0.1804375;
+  const y = rl * 0.2126729 + gl * 0.7151522 + bl * 0.0721750;
+  const z = rl * 0.0193339 + gl * 0.1191920 + bl * 0.9503041;
+  
+  // Convert XYZ to OKLCH (simplified)
+  const l = Math.pow(y, 1/3) * 1.16 - 0.16; // Lightness 0-1
+  
+  // Calculate chroma and hue from a,b
+  const a = (x - y) * 3.2;
+  const b_val = (y - z) * 1.8;
+  const c = Math.sqrt(a * a + b_val * b_val) * 0.3; // Chroma
+  const h = Math.atan2(b_val, a) * (180 / Math.PI); // Hue in degrees
+  
+  return { 
+    l: Math.max(0, Math.min(1, l)), 
+    c: Math.max(0, Math.min(0.35, c)), 
+    h: ((h % 360) + 360) % 360 
+  };
 };
 
-// Convert HSL to RGB String "R G B"
-export const hslToRgbString = (h: number, s: number, l: number): string => {
-  s /= 100;
-  l /= 100;
-  const k = (n: number) => (n + h / 30) % 12;
-  const a = s * Math.min(l, 1 - l);
-  const f = (n: number) =>
-    l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
-    
-  const r = Math.round(f(0) * 255);
-  const g = Math.round(f(8) * 255);
-  const b = Math.round(f(4) * 255);
-  
-  return `${r} ${g} ${b}`;
+// Convert OKLCH to CSS string
+const oklchToString = (l: number, c: number, h: number, alpha?: number): string => {
+  if (alpha !== undefined) {
+    return `oklch(${l} ${c} ${h} / ${alpha})`;
+  }
+  return `oklch(${l} ${c} ${h})`;
 };
 
 export interface GeneratedPalette {
-  void: string;
-  surface: string;
-  surfaceHighlight: string;
-  neonGreen: string;
-  neonPurple: string;
-  neonCyan: string;
-  neonPink: string;
-  content: string; // Main text/border color (White in dark, Black in light)
-  muted: string;   // Secondary text color
-  field: string;   // Input background color
+  // Background colors
+  bgPrimary: string;
+  bgSurface: string;
+  bgSurfaceHighlight: string;
+  bgSubtle: string;
+  
+  // Text colors
+  textPrimary: string;
+  textSecondary: string;
+  textTertiary: string;
+  
+  // Accent color (customizable primary)
+  accent: string;
+  accentHover: string;
+  accentSubtle: string;
+  
+  // Semantic colors
+  positive: string;
+  negative: string;
+  warning: string;
+  
+  // Border colors
+  border: string;
+  borderStrong: string;
 }
 
 export const generatePalette = (primaryHex: string, mode: 'light' | 'dark'): GeneratedPalette => {
-  const rgb = hexToRgbObj(primaryHex) || { r: 204, g: 255, b: 0 };
-  const { h, s, l } = rgbToHsl(rgb.r, rgb.g, rgb.b);
+  const rgb = hexToRgb(primaryHex) || { r: 59, g: 130, b: 246 }; // Default to blue
+  const oklch = rgbToOklch(rgb.r, rgb.g, rgb.b);
   const isDark = mode === 'dark';
-
-  // Backgrounds
-  // Dark: Deep blacks/greys. Light: Whites/Light Greys
-  const voidL = isDark ? 5 : 98;
-  const surfaceL = isDark ? 14 : 95;
-  const highlightL = isDark ? 26 : 90;
-
-  const voidColor = hslToRgbString(h, isDark ? 10 : 5, voidL);
-  const surfaceColor = hslToRgbString(h, isDark ? 10 : 5, surfaceL);
-  const highlightColor = hslToRgbString(h, isDark ? 10 : 5, highlightL);
-
-  // Semantics
-  // Content: Whiteish in Dark Mode, Blackish in Light Mode
-  const content = isDark ? '240 240 245' : '24 24 27'; 
   
-  // Muted: Grey for secondary text
-  const muted = isDark ? '161 161 170' : '82 82 91'; // Zinc 400 vs Zinc 600
-
-  // Field: Background for inputs
-  const field = isDark ? '0 0 0' : '255 255 255';
-
-  // Accents
-  // We manipulate lightness to ensure contrast
-  const accentS = Math.max(s, 80); // Keep saturation high
+  const { h } = oklch;
   
-  // In Dark Mode, accents need to be bright (L > 50).
-  // In Light Mode, accents need to be darker (L < 45) to read against white.
-  const primaryL = isDark ? Math.max(l, 60) : Math.min(l, 40);
-
-  const primary = hslToRgbString(h, accentS, primaryL);
-  const secondary = hslToRgbString((h + 270) % 360, accentS, primaryL);
-  const tertiary = hslToRgbString((h + 180) % 360, accentS, primaryL);
-  const quaternary = hslToRgbString((h + 90) % 360, accentS, primaryL);
-
+  // Background palette - tinted toward primary hue
+  const bgChroma = 0.008; // Very subtle tint
+  
+  const bgPrimary = oklchToString(isDark ? 0.12 : 0.98, bgChroma, h);
+  const bgSurface = oklchToString(isDark ? 0.16 : 0.95, bgChroma, h);
+  const bgSurfaceHighlight = oklchToString(isDark ? 0.20 : 0.92, bgChroma, h);
+  const bgSubtle = oklchToString(isDark ? 0.14 : 0.96, bgChroma, h);
+  
+  // Text colors
+  const textChroma = 0.005;
+  const textPrimary = oklchToString(isDark ? 0.95 : 0.15, textChroma, h);
+  const textSecondary = oklchToString(isDark ? 0.65 : 0.45, bgChroma, h);
+  const textTertiary = oklchToString(isDark ? 0.45 : 0.65, bgChroma, h);
+  
+  // Accent color - derived from primary
+  // Dark mode: lighter accent for contrast
+  // Light mode: darker accent for visibility
+  const accentChroma = isDark ? 0.18 : 0.15;
+  const accentLightness = isDark ? 0.65 : 0.55;
+  
+  const accent = oklchToString(accentLightness, accentChroma, h);
+  const accentHover = oklchToString(accentLightness + 0.05, accentChroma + 0.02, h);
+  const accentSubtle = oklchToString(accentLightness, accentChroma, h, 0.1);
+  
+  // Semantic colors (fixed hues)
+  const positive = oklchToString(0.72, 0.16, 145); // Green
+  const negative = oklchToString(0.62, 0.18, 25);  // Red
+  const warning = oklchToString(0.75, 0.15, 85);   // Amber
+  
+  // Border colors
+  const borderChroma = bgChroma;
+  const border = oklchToString(isDark ? 0.25 : 0.85, borderChroma, h);
+  const borderStrong = oklchToString(isDark ? 0.35 : 0.75, borderChroma, h);
+  
   return {
-    void: voidColor,
-    surface: surfaceColor,
-    surfaceHighlight: highlightColor,
-    neonGreen: primary,
-    neonPurple: secondary,
-    neonCyan: tertiary,
-    neonPink: quaternary,
-    content,
-    muted,
-    field
+    bgPrimary,
+    bgSurface,
+    bgSurfaceHighlight,
+    bgSubtle,
+    textPrimary,
+    textSecondary,
+    textTertiary,
+    accent,
+    accentHover,
+    accentSubtle,
+    positive,
+    negative,
+    warning,
+    border,
+    borderStrong
   };
 };

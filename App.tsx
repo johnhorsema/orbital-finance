@@ -31,7 +31,7 @@ const DesktopTopBar = () => {
 // Mobile Top Bar
 const MobileTopBar = () => {
   return (
-    <div className="flex md:hidden fixed top-0 left-0 right-0 h-16 items-center justify-center bg-surface/80 backdrop-blur-md border-b border-content/5 z-40 px-4">
+    <div className="flex md:hidden fixed top-0 left-0 right-0 h-16 items-center justify-center bg-bg-surface/80 backdrop-blur-md border-b border-border z-40 px-4">
        <WalletSwitcher />
     </div>
   );
@@ -46,7 +46,7 @@ const ProtectedLayout: React.FC = () => {
   }
 
   return (
-    <div className="flex min-h-screen bg-void text-content selection:bg-neon-pink selection:text-white">
+    <div className="flex min-h-screen bg-bg-primary text-text-primary selection:bg-accent selection:text-bg-primary">
       <Sidebar />
       <div className="flex-1 md:ml-64 relative pb-24 md:pb-0">
          <MobileTopBar />

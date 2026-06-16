@@ -101,18 +101,33 @@ export const Dashboard: React.FC = () => {
       return { value: change, percent };
   }, [state.transactions, totalBalance, rates, globalCurrency]);
 
-  // Dummy Chart Data - In a real app, generate this from transaction history
+  // Generate Chart Data from Transaction History
   const chartData = useMemo(() => {
-    return [
-      { name: 'Mon', value: totalBalance * 0.92 },
-      { name: 'Tue', value: totalBalance * 0.94 },
-      { name: 'Wed', value: totalBalance * 0.91 },
-      { name: 'Thu', value: totalBalance * 0.98 },
-      { name: 'Fri', value: totalBalance * 1.02 },
-      { name: 'Sat', value: totalBalance * 0.99 },
-      { name: 'Sun', value: totalBalance },
-    ];
-  }, [totalBalance]);
+    const now = new Date();
+    const last7Days = Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(now);
+      d.setDate(d.getDate() - (6 - i));
+      return d.toISOString().split('T')[0];
+    });
+
+    // Calculate cumulative balance for each day
+    const dataPoints = last7Days.map(date => {
+      let runningBalance = 0;
+      state.transactions.forEach(tx => {
+        if (tx.date <= date) {
+          const val = getGlobalValue(tx.amount, tx.currency);
+          if (tx.type === 'INCOME') runningBalance += val;
+          else runningBalance -= val;
+        }
+      });
+      return {
+        name: new Date(date).toLocaleDateString('en-US', { weekday: 'short' }),
+        value: runningBalance
+      };
+    });
+
+    return dataPoints;
+  }, [state.transactions, rates, globalCurrency]);
 
   const recentTransactions = [...state.transactions]
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
@@ -158,18 +173,18 @@ export const Dashboard: React.FC = () => {
 
   const AddTransactionForm = () => (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="grid grid-cols-2 gap-0 border border-content/10 rounded-sm overflow-hidden">
+      <div className="grid grid-cols-2 gap-0 border border-border overflow-hidden">
         <button
           type="button"
           onClick={() => setTxType('EXPENSE')}
-          className={`p-3 font-mono text-sm transition-colors ${txType === 'EXPENSE' ? 'bg-neon-pink text-black font-bold' : 'bg-transparent text-muted hover:text-content'}`}
+          className={`p-3 font-mono text-sm transition-colors ${txType === 'EXPENSE' ? 'bg-negative text-text-primary font-semibold' : 'bg-transparent text-text-secondary hover:text-text-primary hover:bg-bg-surface-highlight'}`}
         >
           EXPENSE
         </button>
         <button
           type="button"
           onClick={() => setTxType('INCOME')}
-          className={`p-3 font-mono text-sm transition-colors ${txType === 'INCOME' ? 'bg-neon-green text-black font-bold' : 'bg-transparent text-muted hover:text-content'}`}
+          className={`p-3 font-mono text-sm transition-colors ${txType === 'INCOME' ? 'bg-positive text-text-primary font-semibold' : 'bg-transparent text-text-secondary hover:text-text-primary hover:bg-bg-surface-highlight'}`}
         >
           INCOME
         </button>
@@ -177,23 +192,23 @@ export const Dashboard: React.FC = () => {
 
       <div className="grid grid-cols-2 gap-4">
         <div className="col-span-1">
-          <label className="block text-xs font-mono text-muted mb-2 uppercase">Amount</label>
+          <label className="block text-xs font-mono text-text-secondary mb-2 uppercase">Amount</label>
           <input 
             type="number"
             step="any"
             required
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            className="w-full bg-field border border-content/10 p-3 text-content font-mono focus:border-neon-green focus:outline-none transition-colors"
+            className="w-full bg-bg-primary border border-border p-3 text-text-primary font-mono focus:border-accent focus:outline-none transition-colors"
             placeholder="0.00"
           />
         </div>
         <div className="col-span-1">
-          <label className="block text-xs font-mono text-muted mb-2 uppercase">Currency</label>
+          <label className="block text-xs font-mono text-text-secondary mb-2 uppercase">Currency</label>
           <select 
             value={currency}
             onChange={(e) => setCurrency(e.target.value as CurrencyCode)}
-            className="w-full bg-field border border-content/10 p-3 text-content font-mono focus:border-neon-green focus:outline-none"
+            className="w-full bg-bg-primary border border-border p-3 text-text-primary font-mono focus:border-accent focus:outline-none transition-colors"
           >
             {SUPPORTED_CURRENCIES.map(c => (
               <option key={c} value={c}>{c}</option>
@@ -204,11 +219,11 @@ export const Dashboard: React.FC = () => {
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-xs font-mono text-muted mb-2 uppercase">Wallet</label>
+          <label className="block text-xs font-mono text-text-secondary mb-2 uppercase">Wallet</label>
           <select 
             value={walletId}
             onChange={(e) => setWalletId(e.target.value)}
-            className="w-full bg-field border border-content/10 p-3 text-content font-mono focus:border-neon-green focus:outline-none"
+            className="w-full bg-bg-primary border border-border p-3 text-text-primary font-mono focus:border-accent focus:outline-none transition-colors"
             required
           >
             <option value="" disabled>Select Wallet</option>
@@ -218,11 +233,11 @@ export const Dashboard: React.FC = () => {
           </select>
         </div>
         <div>
-          <label className="block text-xs font-mono text-muted mb-2 uppercase">Category</label>
+          <label className="block text-xs font-mono text-text-secondary mb-2 uppercase">Category</label>
           <select 
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            className="w-full bg-field border border-content/10 p-3 text-content font-mono focus:border-neon-green focus:outline-none"
+            className="w-full bg-bg-primary border border-border p-3 text-text-primary font-mono focus:border-accent focus:outline-none transition-colors"
           >
             {state.categories.map(c => (
               <option key={c} value={c}>{c}</option>
@@ -232,17 +247,17 @@ export const Dashboard: React.FC = () => {
       </div>
 
       <div>
-        <label className="block text-xs font-mono text-muted mb-2 uppercase">Description</label>
+        <label className="block text-xs font-mono text-text-secondary mb-2 uppercase">Description</label>
         <input 
           type="text" 
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="w-full bg-field border border-content/10 p-3 text-content font-mono focus:border-neon-green focus:outline-none transition-colors"
+          className="w-full bg-bg-primary border border-border p-3 text-text-primary font-mono focus:border-accent focus:outline-none transition-colors"
           placeholder="What was this for?"
         />
       </div>
 
-      <Button type="submit" variant="neon" className="w-full h-12">
+      <Button type="submit" variant="primary" className="w-full h-12">
         Confirm Transaction
       </Button>
     </form>
@@ -256,27 +271,27 @@ export const Dashboard: React.FC = () => {
       className="p-8 pb-20 space-y-8 max-w-7xl mx-auto"
     >
       {/* Header */}
-      <motion.div variants={itemVariants} className="flex flex-col md:flex-row justify-between items-start md:items-end border-b border-content/5 pb-6 gap-4">
+      <motion.div variants={itemVariants} className="flex flex-col md:flex-row justify-between items-start md:items-end border-b border-border pb-6 gap-4">
         <div>
-          <h1 className="text-4xl md:text-6xl font-sans font-light tracking-tighter text-content">
-            OVER<span className="text-neon-green font-bold">VIEW</span>
+          <h1 className="text-3xl md:text-5xl font-sans font-medium tracking-tight text-text-primary">
+            Overview
           </h1>
-          <p className="text-muted mt-2 font-mono">Financial telemetry // {new Date().toLocaleDateString()}</p>
+          <p className="text-text-secondary mt-2 font-mono text-sm">{new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
         </div>
         <div className="flex gap-3 w-full md:w-auto mt-4 md:mt-0">
           <Button 
-            variant="neon" 
+            variant="primary" 
             onClick={() => setIsAddingTx(true)} 
-            icon={<Plus size={18} />}
-            className="flex-1 md:flex-none shadow-lg shadow-neon-green/20"
+            icon={<Plus size={16} />}
+            className="flex-1 md:flex-none"
           >
             Add Transaction
           </Button>
           <Button 
             variant="ghost" 
             onClick={handleRefresh} 
-            icon={<RefreshCw size={18} className={isRefreshing ? "animate-spin" : ""} />}
-            className="flex-1 md:flex-none text-muted hover:text-content"
+            icon={<RefreshCw size={16} className={isRefreshing ? "animate-spin" : ""} />}
+            className="flex-1 md:flex-none"
           >
             Refresh
           </Button>
@@ -288,93 +303,88 @@ export const Dashboard: React.FC = () => {
         {/* Main Balance Card */}
         <motion.div 
           variants={itemVariants} 
-          className="col-span-1 md:col-span-2 relative overflow-hidden bg-surface border border-content/5 p-8 group"
+          className="col-span-1 md:col-span-2 relative overflow-hidden bg-bg-surface border border-border p-8"
         >
-          <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-            <div className="text-9xl font-bold font-mono text-neon-green">{globalCurrency}</div>
-          </div>
           <div className="relative z-10">
-            <h3 className="text-muted font-mono text-sm uppercase tracking-widest mb-2">Net Worth</h3>
-            <div className="text-5xl md:text-7xl font-sans font-bold text-content tracking-tight flex items-baseline gap-2">
-              <span className="text-2xl text-neon-green">
+            <h3 className="text-text-secondary font-mono text-xs uppercase tracking-wider mb-3">Net Worth</h3>
+            <div className="text-4xl md:text-6xl font-sans font-semibold text-text-primary tracking-tight flex items-baseline gap-2">
+              <span className="text-2xl text-accent">
                 {CURRENCY_SYMBOLS[globalCurrency] || globalCurrency}
               </span>
               {totalBalance.toLocaleString(undefined, { maximumFractionDigits: 2 })}
             </div>
-            <div className="mt-6 flex gap-4">
-              <div className={`flex items-center gap-2 px-3 py-1 rounded-sm border ${netWorthChange.value >= 0 ? 'text-neon-green bg-neon-green/10 border-neon-green/20' : 'text-neon-pink bg-neon-pink/10 border-neon-pink/20'}`}>
-                {netWorthChange.value >= 0 ? <ArrowUpRight size={16} /> : <ArrowDownLeft size={16} />}
-                <span className="font-mono text-sm">
+            <div className="mt-4 flex items-center gap-2">
+              <div className={`flex items-center gap-2 px-2.5 py-1 text-sm font-mono ${netWorthChange.value >= 0 ? 'text-positive bg-positive/10' : 'text-negative bg-negative/10'}`}>
+                {netWorthChange.value >= 0 ? <ArrowUpRight size={14} /> : <ArrowDownLeft size={14} />}
+                <span>
                     {netWorthChange.value >= 0 ? '+' : ''}{netWorthChange.percent.toFixed(2)}% (24h)
                 </span>
               </div>
             </div>
           </div>
-          {/* Decorative Grid */}
-          <div className="absolute inset-0 bg-grid-pattern opacity-10 pointer-events-none" />
         </motion.div>
 
         {/* Quick Actions / Mini Stats */}
         <motion.div variants={itemVariants} className="grid grid-rows-2 gap-6">
-           <div className="bg-surfaceHighlight border border-content/5 p-6 flex flex-col justify-between hover:border-neon-pink/50 transition-colors group">
+           <div className="bg-bg-surface border border-border p-6 flex flex-col justify-between">
               <div className="flex justify-between items-start">
-                 <div className="p-2 bg-neon-pink/10 text-neon-pink rounded-sm">
-                   <ArrowDownLeft size={20} />
+                 <div className="p-2 bg-negative/10 text-negative">
+                   <ArrowDownLeft size={18} />
                  </div>
-                 <span className="font-mono text-xs text-muted group-hover:text-neon-pink transition-colors">Expenses</span>
+                 <span className="font-mono text-xs text-text-secondary">Expenses</span>
               </div>
               <div>
-                <div className="text-2xl font-mono text-content">
+                <div className="text-2xl font-mono text-text-primary">
                     {CURRENCY_SYMBOLS[globalCurrency] || ''}{monthlyStats.expense.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </div>
-                <div className="text-xs text-muted mt-1">This Month</div>
+                <div className="text-xs text-text-secondary mt-1">This Month</div>
               </div>
            </div>
            
-           <div className="bg-surfaceHighlight border border-content/5 p-6 flex flex-col justify-between hover:border-neon-cyan/50 transition-colors group">
+           <div className="bg-bg-surface border border-border p-6 flex flex-col justify-between">
               <div className="flex justify-between items-start">
-                 <div className="p-2 bg-neon-cyan/10 text-neon-cyan rounded-sm">
-                   <ArrowUpRight size={20} />
+                 <div className="p-2 bg-positive/10 text-positive">
+                   <ArrowUpRight size={18} />
                  </div>
-                 <span className="font-mono text-xs text-muted group-hover:text-neon-cyan transition-colors">Income</span>
+                 <span className="font-mono text-xs text-text-secondary">Income</span>
               </div>
               <div>
-                <div className="text-2xl font-mono text-content">
+                <div className="text-2xl font-mono text-text-primary">
                     {CURRENCY_SYMBOLS[globalCurrency] || ''}{monthlyStats.income.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </div>
-                <div className="text-xs text-muted mt-1">This Month</div>
+                <div className="text-xs text-text-secondary mt-1">This Month</div>
               </div>
            </div>
         </motion.div>
       </div>
 
       {/* Chart Section */}
-      <motion.div variants={itemVariants} className="h-80 w-full bg-surface border border-content/5 p-6 relative">
-        <h3 className="font-mono text-sm text-muted mb-6 uppercase tracking-widest">Asset Performance</h3>
+      <motion.div variants={itemVariants} className="h-80 w-full bg-bg-surface border border-border p-6">
+        <h3 className="font-mono text-xs text-text-secondary mb-6 uppercase tracking-wider">Asset Performance</h3>
         <ResponsiveContainer width="100%" height="80%">
           <AreaChart data={chartData}>
             <defs>
               <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="rgb(var(--color-neon-green))" stopOpacity={0.2}/>
-                <stop offset="95%" stopColor="rgb(var(--color-neon-green))" stopOpacity={0}/>
+                <stop offset="5%" stopColor="var(--color-accent)" stopOpacity={0.15}/>
+                <stop offset="95%" stopColor="var(--color-accent)" stopOpacity={0}/>
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke={themeMode === 'dark' ? "#333" : "#e5e7eb"} vertical={false} />
-            <XAxis dataKey="name" stroke={themeMode === 'dark' ? "#666" : "#9ca3af"} fontSize={12} tickLine={false} axisLine={false} fontFamily="JetBrains Mono" />
-            <YAxis stroke={themeMode === 'dark' ? "#666" : "#9ca3af"} fontSize={12} tickLine={false} axisLine={false} fontFamily="JetBrains Mono" tickFormatter={(val) => `$${val}`} />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
+            <XAxis dataKey="name" stroke="var(--color-text-secondary)" fontSize={12} tickLine={false} axisLine={false} fontFamily="JetBrains Mono" />
+            <YAxis stroke="var(--color-text-secondary)" fontSize={12} tickLine={false} axisLine={false} fontFamily="JetBrains Mono" tickFormatter={(val) => `${CURRENCY_SYMBOLS[globalCurrency] || ''}${val}`} />
             <Tooltip 
               contentStyle={{ 
-                backgroundColor: 'rgb(var(--color-surface))', 
-                borderColor: 'rgb(var(--color-content) / 0.1)', 
+                backgroundColor: 'var(--color-bg-surface-highlight)', 
+                borderColor: 'var(--color-border-strong)', 
                 borderRadius: '0px',
-                color: 'rgb(var(--color-content))'
+                color: 'var(--color-text-primary)'
               }}
-              itemStyle={{ color: 'rgb(var(--color-neon-green))', fontFamily: 'JetBrains Mono' }}
+              itemStyle={{ color: 'var(--color-accent)', fontFamily: 'JetBrains Mono' }}
             />
             <Area 
               type="monotone" 
               dataKey="value" 
-              stroke="rgb(var(--color-neon-green))" 
+              stroke="var(--color-accent)" 
               strokeWidth={2}
               fillOpacity={1} 
               fill="url(#colorValue)" 
@@ -386,39 +396,39 @@ export const Dashboard: React.FC = () => {
       {/* Transactions */}
       <motion.div variants={itemVariants} className="space-y-4">
         <div className="flex justify-between items-center">
-            <h3 className="font-mono text-sm text-muted uppercase tracking-widest">Recent Activity</h3>
+            <h3 className="font-mono text-xs text-text-secondary uppercase tracking-wider">Recent Activity</h3>
             <Button size="sm" variant="ghost" onClick={() => navigate('/activity')}>View All</Button>
         </div>
         
-        <div className="grid gap-2">
+        <div className="bg-bg-surface border border-border divide-y divide-border">
           {recentTransactions.map((tx, i) => (
             <motion.div 
               key={tx.id}
-              initial={{ x: -20, opacity: 0 }}
+              initial={{ x: -10, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               transition={{ delay: i * 0.05 }}
               onClick={() => setSelectedTx(tx)}
-              className="flex items-center justify-between p-4 bg-surface/50 border-b border-content/5 hover:bg-surfaceHighlight transition-colors cursor-pointer group"
+              className="flex items-center justify-between p-4 hover:bg-bg-surface-highlight transition-colors cursor-pointer"
             >
                <div className="flex items-center gap-4">
-                  <div className={`w-2 h-2 rounded-full ${tx.type === 'INCOME' ? 'bg-neon-green' : 'bg-neon-pink'}`} />
+                  <div className={`w-1.5 h-1.5 ${tx.type === 'INCOME' ? 'bg-positive' : 'bg-negative'}`} />
                   <div>
-                    <div className="text-content font-sans text-sm group-hover:text-neon-green transition-colors">{tx.description}</div>
-                    <div className="text-muted text-xs font-mono">{tx.date} • {tx.category}</div>
+                    <div className="text-text-primary font-sans text-sm">{tx.description}</div>
+                    <div className="text-text-secondary text-xs font-mono">{tx.date} · {tx.category}</div>
                   </div>
                </div>
                <div className="text-right">
-                  <div className={`font-mono ${tx.type === 'INCOME' ? 'text-neon-green' : 'text-content'}`}>
+                  <div className={`font-mono ${tx.type === 'INCOME' ? 'text-positive' : 'text-text-primary'}`}>
                     {tx.type === 'INCOME' ? '+' : '-'}{tx.amount} {tx.currency}
                   </div>
                   {tx.convertedAmount !== tx.amount && (
-                     <div className="text-xs text-muted font-mono">≈ {tx.convertedAmount.toFixed(2)} Base</div>
+                     <div className="text-xs text-text-secondary font-mono">≈ {tx.convertedAmount.toFixed(2)} Base</div>
                   )}
                </div>
             </motion.div>
           ))}
           {recentTransactions.length === 0 && (
-            <div className="p-8 text-center text-muted font-mono text-sm border border-dashed border-content/10">
+            <div className="p-8 text-center text-text-secondary font-mono text-sm">
               No transactions recorded in the system.
             </div>
           )}
@@ -445,19 +455,20 @@ export const Dashboard: React.FC = () => {
               initial={{ opacity: 0 }} 
               animate={{ opacity: 1 }} 
               exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+              className="absolute inset-0 bg-bg-primary/90 backdrop-blur-sm"
               onClick={() => setIsAddingTx(false)}
             />
             <motion.div 
-              initial={{ y: 50, opacity: 0 }}
+              initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              exit={{ y: 50, opacity: 0 }}
-              className="bg-surface border border-content/10 p-8 w-full max-w-lg relative z-10 shadow-2xl shadow-neon-green/10"
+              exit={{ y: 20, opacity: 0 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              className="bg-bg-surface border border-border p-8 w-full max-w-lg relative z-10"
             >
-               <button onClick={() => setIsAddingTx(false)} className="absolute top-4 right-4 text-muted hover:text-content">
-                 <X size={24} />
+               <button onClick={() => setIsAddingTx(false)} className="absolute top-4 right-4 text-text-secondary hover:text-text-primary">
+                 <X size={20} />
                </button>
-               <h2 className="text-2xl font-sans text-content mb-6">Log Transaction</h2>
+               <h2 className="text-2xl font-sans font-semibold text-text-primary mb-6">Log Transaction</h2>
                <AddTransactionForm />
             </motion.div>
           </div>
@@ -468,11 +479,11 @@ export const Dashboard: React.FC = () => {
       <div className="md:hidden">
         <Drawer.Root open={isAddingTx} onOpenChange={setIsAddingTx}>
             <Drawer.Portal>
-                <Drawer.Overlay className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100]" />
-                <Drawer.Content className="bg-surface border-t border-content/10 flex flex-col rounded-t-[10px] h-[85vh] mt-24 fixed bottom-0 left-0 right-0 z-[101] outline-none">
-                    <div className="p-4 bg-surface rounded-t-[10px] flex-1 overflow-y-auto">
-                        <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-content/10 mb-8" />
-                        <Drawer.Title className="text-xl font-sans text-content mb-6">Log Transaction</Drawer.Title>
+                <Drawer.Overlay className="fixed inset-0 bg-bg-primary/90 backdrop-blur-sm z-[100]" />
+                <Drawer.Content className="bg-bg-surface border-t border-border flex flex-col rounded-t-sm h-[85vh] mt-24 fixed bottom-0 left-0 right-0 z-[101] outline-none">
+                    <div className="p-4 bg-bg-surface rounded-t-sm flex-1 overflow-y-auto">
+                        <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-border mb-8" />
+                        <Drawer.Title className="text-xl font-sans font-semibold text-text-primary mb-6">Log Transaction</Drawer.Title>
                         <AddTransactionForm />
                     </div>
                 </Drawer.Content>

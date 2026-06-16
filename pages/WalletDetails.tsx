@@ -3,15 +3,25 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useFinance } from '../context/FinanceContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, ArrowRightLeft, TrendingUp, X, Filter, MoreVertical, Trash2, Edit, Save, PieChart as PieChartIcon, Plus, Search } from 'lucide-react';
+import { ArrowLeft, ArrowRightLeft, TrendingUp, X, Trash2, Edit, Save, PieChart as PieChartIcon, Plus, Search } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { TransactionDetailsModal } from '../components/TransactionDetailsModal';
 import { Transaction, CurrencyCode, SUPPORTED_CURRENCIES } from '../types';
 import { Drawer } from 'vaul';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { WalletIcon, ICON_OPTIONS } from '../components/WalletIcon';
 
-const COLORS = ['#CCFF00', '#00F0FF', '#FF0099', '#7000FF', '#FFFFFF', '#52525b', '#fbbf24', '#34d399'];
+// Restrained data visualization colors - muted, purposeful
+const CHART_COLORS = [
+  'oklch(0.65 0.18 250)',  // Electric Blue (accent)
+  'oklch(0.72 0.16 145)',  // Muted Green (positive)
+  'oklch(0.62 0.18 25)',   // Muted Red (negative)
+  'oklch(0.75 0.15 85)',   // Amber (warning)
+  'oklch(0.65 0.12 320)',  // Muted Purple
+  'oklch(0.70 0.14 160)',  // Teal
+  'oklch(0.68 0.16 45)',   // Warm Orange
+  'oklch(0.60 0.14 280)',  // Soft Violet
+];
 
 export const WalletDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -153,43 +163,43 @@ export const WalletDetails: React.FC = () => {
   };
 
   const AddTransactionForm = () => (
-      <form onSubmit={handleAddTransaction} className="space-y-6">
-        <div className="grid grid-cols-2 gap-0 border border-content/10 rounded-sm overflow-hidden">
+      <form onSubmit={handleAddTransaction} className="space-y-4">
+        <div className="grid grid-cols-2 border border-border">
             <button
             type="button"
             onClick={() => setAddType('EXPENSE')}
-            className={`p-3 font-mono text-sm transition-colors ${addType === 'EXPENSE' ? 'bg-neon-pink text-black font-bold' : 'bg-transparent text-muted hover:text-content'}`}
+            className={`p-3 font-mono text-sm transition-colors duration-150 ${addType === 'EXPENSE' ? 'bg-negative text-white font-semibold' : 'bg-bg-surface text-text-secondary hover:text-text-primary hover:bg-bg-elevated'}`}
             >
             EXPENSE
             </button>
             <button
             type="button"
             onClick={() => setAddType('INCOME')}
-            className={`p-3 font-mono text-sm transition-colors ${addType === 'INCOME' ? 'bg-neon-green text-black font-bold' : 'bg-transparent text-muted hover:text-content'}`}
+            className={`p-3 font-mono text-sm transition-colors duration-150 ${addType === 'INCOME' ? 'bg-positive text-white font-semibold' : 'bg-bg-surface text-text-secondary hover:text-text-primary hover:bg-bg-elevated'}`}
             >
             INCOME
             </button>
         </div>
-
+  
         <div className="grid grid-cols-2 gap-4">
-            <div className="col-span-1">
-            <label className="block text-xs font-mono text-muted mb-2 uppercase">Amount</label>
-            <input 
+            <div>
+            <label className="block text-xs font-mono text-text-tertiary mb-2 uppercase tracking-wide">Amount</label>
+            <input
                 type="number"
                 step="any"
                 required
                 value={addAmount}
                 onChange={(e) => setAddAmount(e.target.value)}
-                className="w-full bg-field border border-content/10 p-3 text-content font-mono focus:border-neon-green focus:outline-none transition-colors"
+                className="w-full bg-bg-surface border border-border p-3 text-text-primary font-mono focus:border-accent focus:outline-none transition-colors duration-150 placeholder:text-text-tertiary"
                 placeholder="0.00"
             />
             </div>
-            <div className="col-span-1">
-            <label className="block text-xs font-mono text-muted mb-2 uppercase">Currency</label>
-            <select 
+            <div>
+            <label className="block text-xs font-mono text-text-tertiary mb-2 uppercase tracking-wide">Currency</label>
+            <select
                 value={addCurrency}
                 onChange={(e) => setAddCurrency(e.target.value as CurrencyCode)}
-                className="w-full bg-field border border-content/10 p-3 text-content font-mono focus:border-neon-green focus:outline-none"
+                className="w-full bg-bg-surface border border-border p-3 text-text-primary font-mono focus:border-accent focus:outline-none transition-colors duration-150"
             >
                 {SUPPORTED_CURRENCIES.map(c => (
                 <option key={c} value={c}>{c}</option>
@@ -197,32 +207,32 @@ export const WalletDetails: React.FC = () => {
             </select>
             </div>
         </div>
-
+  
         <div>
-            <label className="block text-xs font-mono text-muted mb-2 uppercase">Category</label>
-            <select 
+            <label className="block text-xs font-mono text-text-tertiary mb-2 uppercase tracking-wide">Category</label>
+            <select
             value={addCategory}
             onChange={(e) => setAddCategory(e.target.value)}
-            className="w-full bg-field border border-content/10 p-3 text-content font-mono focus:border-neon-green focus:outline-none"
+            className="w-full bg-bg-surface border border-border p-3 text-text-primary font-mono focus:border-accent focus:outline-none transition-colors duration-150"
             >
             {state.categories.map(c => (
                 <option key={c} value={c}>{c}</option>
             ))}
             </select>
         </div>
-
+  
         <div>
-            <label className="block text-xs font-mono text-muted mb-2 uppercase">Description</label>
-            <input 
-            type="text" 
+            <label className="block text-xs font-mono text-text-tertiary mb-2 uppercase tracking-wide">Description</label>
+            <input
+            type="text"
             value={addDescription}
             onChange={(e) => setAddDescription(e.target.value)}
-            className="w-full bg-field border border-content/10 p-3 text-content font-mono focus:border-neon-green focus:outline-none transition-colors"
+            className="w-full bg-bg-surface border border-border p-3 text-text-primary font-mono focus:border-accent focus:outline-none transition-colors duration-150 placeholder:text-text-tertiary"
             placeholder="What was this for?"
             />
         </div>
-
-        <Button type="submit" variant="neon" className="w-full h-12">
+  
+        <Button type="submit" variant="primary" className="w-full">
             Confirm Transaction
         </Button>
     </form>
@@ -233,193 +243,224 @@ export const WalletDetails: React.FC = () => {
 
   // Inlined form logic to avoid remounting
   const renderEditForm = () => (
-    <div className="space-y-6" onClick={(e) => e.stopPropagation()}>
+    <div className="space-y-4" onClick={(e) => e.stopPropagation()}>
         <div>
-           <label className="block text-xs font-mono text-muted mb-2 uppercase">Wallet Name</label>
-           <input 
-              type="text" 
-              value={editName} 
+           <label className="block text-xs font-mono text-text-tertiary mb-2 uppercase tracking-wide">Wallet Name</label>
+           <input
+              type="text"
+              value={editName}
               onChange={(e) => setEditName(e.target.value)}
-              className="w-full bg-field border border-content/10 p-3 text-content font-mono focus:border-neon-green focus:outline-none"
+              className="w-full bg-bg-surface border border-border p-3 text-text-primary font-mono focus:border-accent focus:outline-none transition-colors duration-150"
            />
         </div>
         <div>
-           <label className="block text-xs font-mono text-muted mb-2 uppercase">Theme Color</label>
-           <div className="flex flex-wrap gap-3 items-center">
-              {['#CCFF00', '#00F0FF', '#FF0099', '#7000FF', '#FFFFFF', '#ef4444', '#f97316', '#eab308', '#22c55e'].map(c => (
-                  <button 
+           <label className="block text-xs font-mono text-text-tertiary mb-2 uppercase tracking-wide">Theme Color</label>
+           <div className="flex flex-wrap gap-2 items-center">
+              {['oklch(0.65 0.18 250)', 'oklch(0.72 0.16 145)', 'oklch(0.62 0.18 25)', 'oklch(0.75 0.15 85)', 'oklch(0.65 0.12 320)', 'oklch(0.95 0.005 260)'].map(c => (
+                  <button
                       key={c}
                       onClick={() => setEditColor(c)}
-                      className={`h-8 w-8 rounded-full border transition-transform hover:scale-110 ${editColor === c ? 'border-content ring-2 ring-content/20 scale-110' : 'border-transparent'}`}
+                      className={`h-8 w-8 border-2 transition-all duration-150 ${editColor === c ? 'border-text-primary scale-110' : 'border-transparent hover:border-border'}`}
                       style={{ backgroundColor: c }}
                   />
               ))}
               {/* Custom Color Input */}
-              <div 
+              <div
                 onClick={() => colorInputRef.current?.click()}
-                className="relative h-8 w-8 rounded-full overflow-hidden border border-content/20 hover:border-content transition-all cursor-pointer group flex items-center justify-center"
+                className="relative h-8 w-8 border-2 border-border hover:border-text-primary transition-all duration-150 cursor-pointer flex items-center justify-center overflow-hidden"
               >
-                <div className="absolute inset-0 bg-[conic-gradient(from_90deg,#fff,#000)] opacity-50 pointer-events-none" />
-                <div className="w-full h-full bg-[conic-gradient(from_0deg,red,orange,yellow,green,blue,indigo,violet,red)] pointer-events-none" />
-                <Plus size={14} className="absolute text-content pointer-events-none mix-blend-difference z-10" />
-                <input 
+                <div className="w-full h-full bg-[conic-gradient(from_0deg,red,orange,yellow,green,blue,indigo,violet,red)]" />
+                <Plus size={14} className="absolute text-white drop-shadow-md z-10" />
+                <input
                   ref={colorInputRef}
-                  type="color" 
-                  value={editColor} 
+                  type="color"
+                  value={editColor}
                   onChange={(e) => setEditColor(e.target.value)}
-                  className="absolute inset-0 opacity-0 w-full h-full p-0 border-0 pointer-events-none" 
+                  className="absolute inset-0 opacity-0 w-full h-full p-0 border-0 cursor-pointer"
                 />
               </div>
            </div>
         </div>
-        
+  
         {/* Icon Picker */}
         <div>
-           <label className="block text-xs font-mono text-muted mb-2 uppercase">Icon</label>
-           <div className="grid grid-cols-6 gap-2 bg-field/50 p-4 border border-content/5 rounded-lg max-h-48 overflow-y-auto custom-scrollbar">
+           <label className="block text-xs font-mono text-text-tertiary mb-2 uppercase tracking-wide">Icon</label>
+           <div className="grid grid-cols-6 gap-2 bg-bg-elevated p-3 border border-border max-h-48 overflow-y-auto">
               {ICON_OPTIONS.map(iconName => (
                   <button
                       key={iconName}
                       onClick={() => setEditIcon(iconName)}
-                      className={`p-2 rounded flex items-center justify-center transition-colors aspect-square ${editIcon === iconName ? 'bg-neon-green/20 text-neon-green border border-neon-green/50' : 'bg-content/5 text-muted hover:bg-content/10 hover:text-content border border-transparent'}`}
+                      className={`p-2 flex items-center justify-center transition-colors duration-150 aspect-square ${editIcon === iconName ? 'bg-accent/20 text-accent border border-accent/50' : 'bg-bg-surface text-text-secondary hover:bg-bg-elevated hover:text-text-primary border border-transparent'}`}
                   >
                       <WalletIcon icon={iconName} size={20} />
                   </button>
               ))}
            </div>
         </div>
-        
-        <div className="pt-4 border-t border-content/5 flex gap-3">
-            <Button onClick={handleSaveWallet} variant="neon" className="flex-1" icon={<Save size={16} />}>
-                Save
+  
+        <div className="pt-4 border-t border-border flex gap-3">
+            <Button onClick={handleSaveWallet} variant="primary" className="flex-1" icon={<Save size={16} />}>
+                Save Changes
             </Button>
             <Button onClick={handleDeleteWallet} variant="danger" className="flex-1" icon={<Trash2 size={16} />}>
-                Delete
+                Delete Wallet
             </Button>
         </div>
     </div>
   );
 
   return (
-    <div className="p-8 pb-20 max-w-5xl mx-auto">
-      <Button 
-        variant="ghost" 
-        size="sm" 
-        onClick={() => navigate('/wallets')} 
-        className="mb-8 pl-0 hover:bg-transparent hover:text-neon-green"
-        icon={<ArrowLeft size={16} />}
+    <div className="px-8 py-6 pb-20 max-w-6xl mx-auto">
+      {/* Header Navigation */}
+      <button
+        onClick={() => navigate('/wallets')}
+        className="inline-flex items-center gap-2 text-text-secondary hover:text-text-primary transition-colors duration-150 mb-8 group"
       >
-        Back to Vault
-      </Button>
+        <ArrowLeft size={16} className="group-hover:-translate-x-0.5 transition-transform duration-150" />
+        <span className="text-sm font-medium">Back to Vault</span>
+      </button>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-        <div className="md:col-span-2 space-y-2">
-            <div className="flex items-center justify-between md:justify-start md:gap-4">
-                <h1 className="text-4xl md:text-5xl font-sans font-bold text-content tracking-tighter uppercase truncate">
-                    {wallet.name}
-                </h1>
-                <button 
-                    onClick={handleOpenEdit}
-                    className="p-2 hover:bg-content/10 rounded-full text-muted hover:text-content transition-colors"
-                >
-                    <Edit size={20} />
-                </button>
+      {/* Wallet Header Section */}
+      <div className="mb-8">
+        <div className="flex items-start justify-between gap-6">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-3 mb-2">
+              <WalletIcon icon={wallet.icon} type={wallet.type} size={24} className="text-text-secondary" />
+              <h1 className="text-3xl font-semibold text-text-primary tracking-tight truncate">
+                {wallet.name}
+              </h1>
             </div>
-            <div className="flex items-center gap-2">
-                <span className="px-2 py-0.5 border border-content/20 rounded text-xs text-muted font-mono">
-                    {wallet.type}
-                </span>
-                <span className="px-2 py-0.5 border border-content/20 rounded text-xs text-muted font-mono" style={{ color: wallet.color }}>
-                    {wallet.baseCurrency}
-                </span>
+            <div className="flex items-center gap-3">
+              <span className="px-2 py-0.5 bg-bg-elevated border border-border text-xs text-text-secondary font-mono">
+                {wallet.type}
+              </span>
+              <span className="px-2 py-0.5 bg-bg-elevated border border-border text-xs font-mono" style={{ color: wallet.color }}>
+                {wallet.baseCurrency}
+              </span>
             </div>
+          </div>
+          <button
+            onClick={handleOpenEdit}
+            className="p-2 text-text-secondary hover:text-text-primary hover:bg-bg-elevated transition-colors duration-150 shrink-0"
+            aria-label="Edit wallet"
+          >
+            <Edit size={18} />
+          </button>
+        </div>
+      </div>
+
+      {/* Balance Card + Actions */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
+        <div className="lg:col-span-2 bg-bg-surface border border-border p-6">
+          <div className="text-sm text-text-secondary mb-1 font-mono uppercase tracking-wide">Available Balance</div>
+          <div className="text-4xl font-mono font-semibold text-text-primary tracking-tight mb-6">
+            {wallet.balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })}
+            <span className="text-lg text-text-secondary ml-2">{wallet.baseCurrency}</span>
+          </div>
+          
+          <div className="flex gap-3">
+            <Button
+              variant="primary"
+              className="flex-1"
+              icon={<Plus size={16} />}
+              onClick={() => setIsAddingTx(true)}
+            >
+              Add Transaction
+            </Button>
+            <Button
+              variant="secondary"
+              className="flex-1"
+              icon={<ArrowRightLeft size={16} />}
+              onClick={() => setIsTransferring(true)}
+            >
+              Transfer
+            </Button>
+          </div>
         </div>
 
-        <div className="bg-surface border border-content/10 p-6 flex flex-col justify-between relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-transparent to-content/5 rounded-full blur-2xl transform translate-x-10 -translate-y-10 pointer-events-none" style={{ background: wallet.color, opacity: 0.1 }} />
-            
-            <div className="absolute top-4 right-4 text-content/10">
-                <WalletIcon icon={wallet.icon} type={wallet.type} size={48} />
+        {/* Quick Stats */}
+        <div className="bg-bg-surface border border-border p-6">
+          <div className="text-sm text-text-secondary mb-4 font-mono uppercase tracking-wide">Overview</div>
+          <div className="space-y-4">
+            <div>
+              <div className="text-xs text-text-tertiary mb-1 font-mono uppercase">Income</div>
+              <div className="text-xl font-mono font-semibold text-positive">
+                {categoryStats.income.reduce((acc, curr) => acc + curr.value, 0).toFixed(2)}
+                <span className="text-sm text-text-secondary ml-1">{wallet.baseCurrency}</span>
+              </div>
             </div>
-
-            <div className="text-sm font-mono text-muted uppercase">Available Balance</div>
-            <div className="text-4xl font-mono font-bold text-content mt-2">
-                {wallet.balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })} <span className="text-lg text-muted">{wallet.baseCurrency}</span>
+            <div>
+              <div className="text-xs text-text-tertiary mb-1 font-mono uppercase">Expenses</div>
+              <div className="text-xl font-mono font-semibold text-negative">
+                {categoryStats.expense.reduce((acc, curr) => acc + curr.value, 0).toFixed(2)}
+                <span className="text-sm text-text-secondary ml-1">{wallet.baseCurrency}</span>
+              </div>
             </div>
-            <div className="mt-6 flex flex-col gap-3">
-                <Button 
-                    variant="neon" 
-                    className="w-full" 
-                    icon={<Plus size={16} />}
-                    onClick={() => setIsAddingTx(true)}
-                >
-                    Add Transaction
-                </Button>
-                <Button 
-                    variant="secondary" 
-                    className="w-full" 
-                    icon={<ArrowRightLeft size={16} />}
-                    onClick={() => setIsTransferring(true)}
-                >
-                    Transfer
-                </Button>
+            <div>
+              <div className="text-xs text-text-tertiary mb-1 font-mono uppercase">Transactions</div>
+              <div className="text-xl font-mono font-semibold text-text-primary">
+                {transactions.length}
+              </div>
             </div>
+          </div>
         </div>
       </div>
 
       {/* Analytics Section */}
       <div className="mb-12">
           <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-sans text-content flex items-center gap-2">
-                  <PieChartIcon size={18} className="text-muted" />
-                  Distribution
-              </h3>
-              <div className="flex bg-field border border-content/10 rounded-sm p-1">
-                  <button 
+              <h2 className="text-lg font-semibold text-text-primary flex items-center gap-2">
+                  <PieChartIcon size={18} className="text-text-secondary" />
+                  Category Distribution
+              </h2>
+              <div className="flex bg-bg-elevated border border-border">
+                  <button
                       onClick={() => setChartTab('EXPENSE')}
-                      className={`text-xs font-mono uppercase px-3 py-1.5 rounded-sm transition-all ${chartTab === 'EXPENSE' ? 'bg-neon-pink text-black font-bold' : 'text-muted hover:text-content'}`}
+                      className={`text-xs font-mono uppercase px-4 py-2 transition-colors duration-150 ${chartTab === 'EXPENSE' ? 'bg-negative text-white font-semibold' : 'text-text-secondary hover:text-text-primary'}`}
                   >
                       Expense
                   </button>
-                  <button 
+                  <button
                       onClick={() => setChartTab('INCOME')}
-                      className={`text-xs font-mono uppercase px-3 py-1.5 rounded-sm transition-all ${chartTab === 'INCOME' ? 'bg-neon-green text-black font-bold' : 'text-muted hover:text-content'}`}
+                      className={`text-xs font-mono uppercase px-4 py-2 transition-colors duration-150 ${chartTab === 'INCOME' ? 'bg-positive text-white font-semibold' : 'text-text-secondary hover:text-text-primary'}`}
                   >
                       Income
                   </button>
               </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-64">
-               <div className="md:col-span-1 bg-surface border border-content/5 p-6 relative flex flex-col justify-center">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+               {/* Chart */}
+               <div className="lg:col-span-1 bg-bg-surface border border-border p-6">
                    {currentChartData.length > 0 ? (
-                       <div className="relative w-full h-full">
+                       <div className="relative w-full h-64">
                            <ResponsiveContainer width="100%" height="100%">
                                <PieChart>
                                    <Pie
                                        data={currentChartData}
                                        cx="50%"
                                        cy="50%"
-                                       innerRadius={50}
-                                       outerRadius={70}
-                                       paddingAngle={5}
+                                       innerRadius={60}
+                                       outerRadius={80}
+                                       paddingAngle={2}
                                        dataKey="value"
                                        stroke="none"
                                    >
                                        {currentChartData.map((entry, index) => (
-                                           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                           <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
                                        ))}
                                    </Pie>
-                                   <Tooltip 
-                                       contentStyle={{ 
-                                          backgroundColor: 'rgb(var(--color-surface))', 
-                                          borderColor: 'rgb(var(--color-content) / 0.1)', 
-                                          borderRadius: '0px',
-                                          color: 'rgb(var(--color-content))'
+                                   <Tooltip
+                                       contentStyle={{
+                                          backgroundColor: 'var(--color-bg-elevated)',
+                                          borderColor: 'var(--color-border)',
+                                          borderRadius: '0',
+                                          color: 'var(--color-text-primary)',
+                                          fontFamily: 'JetBrains Mono, monospace',
+                                          fontSize: '12px'
                                        }}
-                                       itemStyle={{ fontFamily: 'JetBrains Mono' }}
                                        formatter={(value: number) => {
-                                           const percent = totalChartValue > 0 ? (value / totalChartValue * 100).toFixed(2) : '0.00';
+                                           const percent = totalChartValue > 0 ? (value / totalChartValue * 100).toFixed(1) : '0.0';
                                            return [`${value.toFixed(2)} ${wallet.baseCurrency} (${percent}%)`, 'Amount'];
                                        }}
                                    />
@@ -427,73 +468,73 @@ export const WalletDetails: React.FC = () => {
                            </ResponsiveContainer>
                            {/* Center Text */}
                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                               <div className={`text-xs font-mono font-bold ${chartTab === 'INCOME' ? 'text-neon-green' : 'text-neon-pink'}`}>
+                               <div className={`text-xs font-mono font-semibold ${chartTab === 'INCOME' ? 'text-positive' : 'text-negative'}`}>
                                    {chartTab}
                                </div>
                            </div>
                        </div>
                    ) : (
-                       <div className="h-full flex flex-col items-center justify-center text-muted font-mono text-xs text-center">
-                           No data to display for {chartTab.toLowerCase()}
+                       <div className="h-64 flex flex-col items-center justify-center text-text-tertiary font-mono text-xs text-center">
+                           No data to display
                        </div>
                    )}
                </div>
 
-               {/* Legend / Breakdown List */}
-               <div className="md:col-span-2 bg-surface border border-content/5 p-6 overflow-y-auto custom-scrollbar">
-                   <div className="flex justify-between text-xs font-mono text-muted uppercase mb-4 pb-2 border-b border-content/5">
+               {/* Breakdown List */}
+               <div className="lg:col-span-2 bg-bg-surface border border-border">
+                   <div className="px-6 py-3 border-b border-border flex justify-between text-xs font-mono text-text-tertiary uppercase tracking-wide">
                        <span>Category</span>
-                       <span>Amount & %</span>
+                       <span>Amount</span>
                    </div>
-                   <div className="space-y-3">
+                   <div className="divide-y divide-border max-h-64 overflow-y-auto">
                        {currentChartData.map((entry, index) => {
-                           const percent = totalChartValue > 0 ? ((entry.value / totalChartValue) * 100).toFixed(2) : '0.00';
+                           const percent = totalChartValue > 0 ? ((entry.value / totalChartValue) * 100).toFixed(1) : '0.0';
                            return (
-                            <div key={entry.name} className="flex items-center justify-between group">
+                            <div key={entry.name} className="px-6 py-3 flex items-center justify-between hover:bg-bg-elevated transition-colors duration-150">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
-                                    <span className="text-content font-sans text-sm group-hover:text-neon-cyan transition-colors">{entry.name}</span>
+                                    <div className="w-2 h-2 shrink-0" style={{ backgroundColor: CHART_COLORS[index % CHART_COLORS.length] }} />
+                                    <span className="text-text-primary text-sm">{entry.name}</span>
                                 </div>
-                                <div className="font-mono text-sm text-muted text-right">
-                                    <div>{entry.value.toFixed(2)} <span className="text-xs text-muted">{wallet.baseCurrency}</span></div>
-                                    <div className="text-[10px] text-neon-green opacity-60 group-hover:opacity-100">{percent}%</div>
+                                <div className="font-mono text-sm text-text-secondary text-right">
+                                    <div>{entry.value.toFixed(2)} <span className="text-xs text-text-tertiary">{wallet.baseCurrency}</span></div>
+                                    <div className="text-[10px] text-text-tertiary">{percent}%</div>
                                 </div>
                             </div>
                            );
                        })}
                        {currentChartData.length === 0 && (
-                           <div className="text-muted font-mono text-sm italic">No transactions recorded yet.</div>
+                           <div className="px-6 py-12 text-center text-text-tertiary font-mono text-sm">No transactions recorded</div>
                        )}
                    </div>
                </div>
           </div>
       </div>
 
-      {/* Transaction History with Search & Filter */}
-      <div className="space-y-4">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-content/5 pb-4 gap-4">
-            <h3 className="text-lg font-sans text-content">Ledger</h3>
+      {/* Transaction History */}
+      <div>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-border pb-4 gap-4 mb-4">
+            <h2 className="text-lg font-semibold text-text-primary">Transaction Ledger</h2>
             
-            <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                  {/* Search Input */}
-                 <div className="relative flex-1 md:w-64">
-                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" size={14} />
-                     <input 
-                         type="text" 
-                         placeholder="Filter transactions..." 
+                 <div className="relative flex-1 sm:w-64">
+                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-tertiary" size={14} />
+                     <input
+                         type="text"
+                         placeholder="Search transactions..."
                          value={searchTerm}
                          onChange={(e) => setSearchTerm(e.target.value)}
-                         className="w-full bg-surfaceHighlight border border-content/10 pl-9 pr-3 py-2 text-xs font-mono text-content focus:border-neon-cyan focus:outline-none rounded-sm"
+                         className="w-full bg-bg-surface border border-border pl-9 pr-3 py-2 text-sm text-text-primary placeholder:text-text-tertiary focus:border-accent focus:outline-none transition-colors duration-150"
                      />
                  </div>
                  
                  {/* Type Filter */}
-                 <div className="flex rounded-sm overflow-hidden border border-content/10">
-                     {['ALL', 'INCOME', 'EXPENSE'].map(type => (
+                 <div className="flex border border-border">
+                     {(['ALL', 'INCOME', 'EXPENSE'] as const).map(type => (
                          <button
                              key={type}
-                             onClick={() => setFilterType(type as any)}
-                             className={`px-3 py-2 text-[10px] font-mono font-bold transition-colors ${filterType === type ? 'bg-content text-void' : 'bg-field text-muted hover:text-content'}`}
+                             onClick={() => setFilterType(type)}
+                             className={`px-3 py-2 text-xs font-mono font-semibold transition-colors duration-150 ${filterType === type ? 'bg-text-primary bg-opacity-90 text-bg-primary' : 'bg-bg-surface text-text-secondary hover:text-text-primary hover:bg-bg-elevated'}`}
                          >
                              {type}
                          </button>
@@ -502,36 +543,33 @@ export const WalletDetails: React.FC = () => {
             </div>
         </div>
         
-        <div className="space-y-2">
-            {transactions.map((tx, i) => (
-                <motion.div
+        <div className="bg-bg-surface border border-border divide-y divide-border">
+            {transactions.map((tx) => (
+                <button
                     key={tx.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.05 }}
                     onClick={() => setSelectedTx(tx)}
-                    className="flex items-center justify-between p-4 bg-surface/50 border border-transparent hover:border-content/10 hover:bg-surfaceHighlight transition-all cursor-pointer group rounded-sm"
+                    className="w-full flex items-center justify-between px-6 py-4 hover:bg-bg-elevated transition-colors duration-150 text-left"
                 >
-                    <div className="flex items-center gap-4">
-                        <div className={`p-2 rounded-full ${tx.type === 'INCOME' ? 'bg-neon-green/10 text-neon-green' : 'bg-neon-pink/10 text-neon-pink'}`}>
+                    <div className="flex items-center gap-4 min-w-0 flex-1">
+                        <div className={`p-2 shrink-0 ${tx.type === 'INCOME' ? 'bg-positive/10 text-positive' : 'bg-negative/10 text-negative'}`}>
                             <TrendingUp size={16} className={tx.type === 'EXPENSE' ? 'rotate-180' : ''} />
                         </div>
-                        <div className="overflow-hidden">
-                            <div className="text-content font-sans text-sm truncate max-w-[200px] md:max-w-md">{tx.description}</div>
-                            <div className="text-muted text-xs font-mono flex gap-2">
+                        <div className="min-w-0 flex-1">
+                            <div className="text-text-primary text-sm truncate">{tx.description}</div>
+                            <div className="text-text-tertiary text-xs font-mono mt-0.5 flex items-center gap-2">
                                 <span>{tx.date}</span>
-                                <span className="text-content/20">|</span>
+                                <span className="text-border">·</span>
                                 <span>{tx.category}</span>
                             </div>
                         </div>
                     </div>
-                    <div className={`font-mono ${tx.type === 'INCOME' ? 'text-neon-green' : 'text-content'}`}>
+                    <div className={`font-mono text-sm shrink-0 ml-4 ${tx.type === 'INCOME' ? 'text-positive' : 'text-text-primary'}`}>
                         {tx.type === 'INCOME' ? '+' : '-'}{tx.amount} {tx.currency}
                     </div>
-                </motion.div>
+                </button>
             ))}
             {transactions.length === 0 && (
-                <div className="py-12 text-center text-muted font-mono">No transactions found matching your filters.</div>
+                <div className="py-16 text-center text-text-tertiary font-mono text-sm">No transactions found</div>
             )}
         </div>
       </div>
@@ -552,38 +590,40 @@ export const WalletDetails: React.FC = () => {
       <AnimatePresence>
         {isAddingTx && (
           <div className="hidden md:flex fixed inset-0 z-[100] items-center justify-center p-4">
-            <motion.div 
-              initial={{ opacity: 0 }} 
-              animate={{ opacity: 1 }} 
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
               className="absolute inset-0 bg-black/80 backdrop-blur-sm"
               onClick={() => setIsAddingTx(false)}
             />
-            <motion.div 
-              initial={{ y: 50, opacity: 0 }}
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              exit={{ y: 50, opacity: 0 }}
-              className="bg-surface border border-content/10 p-8 w-full max-w-lg relative z-10 shadow-2xl shadow-neon-green/10"
+              exit={{ y: 20, opacity: 0 }}
+              transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+              className="bg-bg-surface border border-border p-6 w-full max-w-lg relative z-10"
             >
-               <button onClick={() => setIsAddingTx(false)} className="absolute top-4 right-4 text-muted hover:text-content">
-                 <X size={24} />
+               <button onClick={() => setIsAddingTx(false)} className="absolute top-4 right-4 text-text-secondary hover:text-text-primary transition-colors duration-150">
+                 <X size={20} />
                </button>
-               <h2 className="text-2xl font-sans text-content mb-6">Log Transaction</h2>
+               <h2 className="text-xl font-semibold text-text-primary mb-6">Log Transaction</h2>
                <AddTransactionForm />
             </motion.div>
           </div>
         )}
       </AnimatePresence>
-
+      
       {/* Add Transaction Drawer (Mobile) */}
       <div className="md:hidden">
         <Drawer.Root open={isAddingTx} onOpenChange={setIsAddingTx}>
             <Drawer.Portal>
                 <Drawer.Overlay className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100]" />
-                <Drawer.Content className="bg-surface border-t border-content/10 flex flex-col rounded-t-[10px] h-[85vh] mt-24 fixed bottom-0 left-0 right-0 z-[101] outline-none">
-                    <div className="p-4 bg-surface rounded-t-[10px] flex-1 overflow-y-auto">
-                        <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-content/10 mb-8" />
-                        <Drawer.Title className="text-xl font-sans text-content mb-6">Log Transaction</Drawer.Title>
+                <Drawer.Content className="bg-bg-surface border-t border-border flex flex-col h-[85vh] mt-24 fixed bottom-0 left-0 right-0 z-[101] outline-none">
+                    <div className="p-4 bg-bg-surface flex-1 overflow-y-auto">
+                        <div className="mx-auto w-12 h-1 flex-shrink-0 bg-bg-elevated mb-6" />
+                        <Drawer.Title className="text-xl font-semibold text-text-primary mb-6">Log Transaction</Drawer.Title>
                         <AddTransactionForm />
                     </div>
                 </Drawer.Content>
@@ -595,44 +635,46 @@ export const WalletDetails: React.FC = () => {
       <AnimatePresence>
         {isTransferring && (
             <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-                <motion.div 
-                    initial={{ opacity: 0 }} 
-                    animate={{ opacity: 1 }} 
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
+                    transition={{ duration: 0.15 }}
                     className="absolute inset-0 bg-black/80 backdrop-blur-sm"
                     onClick={() => setIsTransferring(false)}
                 />
-                <motion.div 
-                    initial={{ scale: 0.95, opacity: 0 }}
+                <motion.div
+                    initial={{ scale: 0.98, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
-                    exit={{ scale: 0.95, opacity: 0 }}
-                    className="bg-surface border border-content/10 p-8 w-full max-w-md relative z-10 shadow-2xl"
+                    exit={{ scale: 0.98, opacity: 0 }}
+                    transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                    className="bg-bg-surface border border-border p-6 w-full max-w-md relative z-10"
                 >
-                    <button onClick={() => setIsTransferring(false)} className="absolute top-4 right-4 text-muted hover:text-content">
-                        <X size={24} />
+                    <button onClick={() => setIsTransferring(false)} className="absolute top-4 right-4 text-text-secondary hover:text-text-primary transition-colors duration-150">
+                        <X size={20} />
                     </button>
-                    
-                    <h2 className="text-2xl font-sans text-content mb-6">Transfer Funds</h2>
-                    
-                    <form onSubmit={handleTransfer} className="space-y-6">
-                        <div className="bg-content/5 p-4 rounded border border-content/5">
-                            <label className="block text-xs font-mono text-muted mb-1 uppercase">From</label>
-                            <div className="text-content font-bold">{wallet.name}</div>
-                            <div className="text-xs text-muted">Balance: {wallet.balance.toFixed(2)} {wallet.baseCurrency}</div>
+      
+                    <h2 className="text-xl font-semibold text-text-primary mb-6">Transfer Funds</h2>
+      
+                    <form onSubmit={handleTransfer} className="space-y-4">
+                        <div className="bg-bg-elevated p-4 border border-border">
+                            <label className="block text-xs font-mono text-text-tertiary mb-1 uppercase tracking-wide">From</label>
+                            <div className="text-text-primary font-semibold">{wallet.name}</div>
+                            <div className="text-xs text-text-tertiary font-mono">Balance: {wallet.balance.toFixed(2)} {wallet.baseCurrency}</div>
                         </div>
-
-                        <div className="flex justify-center -my-3 relative z-10">
-                            <div className="bg-field border border-content/10 p-2 rounded-full text-neon-green">
-                                <ArrowRightLeft size={16} className="rotate-90" />
+      
+                        <div className="flex justify-center -my-2 relative z-10">
+                            <div className="bg-bg-elevated border border-border p-2 text-positive">
+                                <ArrowRightLeft size={16} />
                             </div>
                         </div>
-
+      
                         <div>
-                             <label className="block text-xs font-mono text-muted mb-2 uppercase">To Wallet</label>
-                             <select 
+                             <label className="block text-xs font-mono text-text-tertiary mb-2 uppercase tracking-wide">To Wallet</label>
+                             <select
                                 value={transferTargetId}
                                 onChange={(e) => setTransferTargetId(e.target.value)}
-                                className="w-full bg-field border border-content/10 p-3 text-content font-mono focus:border-neon-green focus:outline-none"
+                                className="w-full bg-bg-surface border border-border p-3 text-text-primary font-mono focus:border-accent focus:outline-none transition-colors duration-150"
                                 required
                              >
                                 <option value="" disabled>Select Destination</option>
@@ -641,21 +683,21 @@ export const WalletDetails: React.FC = () => {
                                 ))}
                              </select>
                         </div>
-
+      
                         <div>
-                            <label className="block text-xs font-mono text-muted mb-2 uppercase">Amount ({wallet.baseCurrency})</label>
-                            <input 
+                            <label className="block text-xs font-mono text-text-tertiary mb-2 uppercase tracking-wide">Amount ({wallet.baseCurrency})</label>
+                            <input
                                 type="number"
                                 step="any"
                                 required
                                 value={transferAmount}
                                 onChange={(e) => setTransferAmount(e.target.value)}
-                                className="w-full bg-field border border-content/10 p-3 text-content font-mono focus:border-neon-green focus:outline-none"
+                                className="w-full bg-bg-surface border border-border p-3 text-text-primary font-mono focus:border-accent focus:outline-none transition-colors duration-150 placeholder:text-text-tertiary"
                                 placeholder="0.00"
                             />
                         </div>
-
-                        <Button type="submit" variant="neon" className="w-full h-12">
+      
+                        <Button type="submit" variant="primary" className="w-full">
                             Execute Transfer
                         </Button>
                     </form>
@@ -668,39 +710,41 @@ export const WalletDetails: React.FC = () => {
       <AnimatePresence>
         {isEditingWallet && (
           <div className="hidden md:flex fixed inset-0 z-[100] items-center justify-center p-4">
-            <motion.div 
-              initial={{ opacity: 0 }} 
-              animate={{ opacity: 1 }} 
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
               className="absolute inset-0 bg-black/80 backdrop-blur-sm"
               onClick={() => setIsEditingWallet(false)}
             />
-            <motion.div 
-              initial={{ y: 50, opacity: 0 }}
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              exit={{ y: 50, opacity: 0 }}
-              className="bg-surface border border-content/10 p-8 w-full max-w-md relative z-10 shadow-2xl"
+              exit={{ y: 20, opacity: 0 }}
+              transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+              className="bg-bg-surface border border-border p-6 w-full max-w-md relative z-10"
               onClick={(e) => e.stopPropagation()}
             >
-               <button onClick={() => setIsEditingWallet(false)} className="absolute top-4 right-4 text-muted hover:text-content">
-                 <X size={24} />
+               <button onClick={() => setIsEditingWallet(false)} className="absolute top-4 right-4 text-text-secondary hover:text-text-primary transition-colors duration-150">
+                 <X size={20} />
                </button>
-               <h2 className="text-2xl font-sans text-content mb-6">Edit Wallet</h2>
+               <h2 className="text-xl font-semibold text-text-primary mb-6">Edit Wallet</h2>
                {renderEditForm()}
             </motion.div>
           </div>
         )}
       </AnimatePresence>
-
+      
       {/* Edit Wallet Drawer (Mobile) */}
       <div className="md:hidden">
         <Drawer.Root open={isEditingWallet} onOpenChange={setIsEditingWallet}>
             <Drawer.Portal>
                 <Drawer.Overlay className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100]" />
-                <Drawer.Content className="bg-surface border-t border-content/10 flex flex-col rounded-t-[10px] fixed bottom-0 left-0 right-0 z-[101] outline-none">
-                    <div className="p-4 bg-surface rounded-t-[10px]">
-                        <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-content/10 mb-8" />
-                        <Drawer.Title className="text-xl font-sans text-content mb-6">Edit Wallet</Drawer.Title>
+                <Drawer.Content className="bg-bg-surface border-t border-border flex flex-col fixed bottom-0 left-0 right-0 z-[101] outline-none">
+                    <div className="p-4 bg-bg-surface">
+                        <div className="mx-auto w-12 h-1 flex-shrink-0 bg-bg-elevated mb-6" />
+                        <Drawer.Title className="text-xl font-semibold text-text-primary mb-6">Edit Wallet</Drawer.Title>
                         {renderEditForm()}
                     </div>
                 </Drawer.Content>

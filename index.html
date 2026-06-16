@@ -10,106 +10,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;700&family=Unbounded:wght@300;400;600;800&display=swap" rel="stylesheet">
     
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        darkMode: 'class',
-        theme: {
-          extend: {
-            fontFamily: {
-              sans: ['Unbounded', 'sans-serif'],
-              mono: ['JetBrains Mono', 'monospace'],
-            },
-            colors: {
-              // Colors defined using RGB vars to support opacity modifiers
-              void: 'rgb(var(--color-void) / <alpha-value>)', 
-              surface: 'rgb(var(--color-surface) / <alpha-value>)',
-              surfaceHighlight: 'rgb(var(--color-surface-highlight) / <alpha-value>)',
-              content: 'rgb(var(--color-content) / <alpha-value>)',
-              muted: 'rgb(var(--color-muted) / <alpha-value>)',
-              field: 'rgb(var(--color-field) / <alpha-value>)',
-              neon: {
-                green: 'rgb(var(--color-neon-green) / <alpha-value>)',
-                purple: 'rgb(var(--color-neon-purple) / <alpha-value>)',
-                cyan: 'rgb(var(--color-neon-cyan) / <alpha-value>)',
-                pink: 'rgb(var(--color-neon-pink) / <alpha-value>)'
-              }
-            },
-            backgroundImage: {
-              'grid-pattern': "linear-gradient(to right, rgb(var(--color-content) / 0.05) 1px, transparent 1px), linear-gradient(to bottom, rgb(var(--color-content) / 0.05) 1px, transparent 1px)",
-              'radial-fade': "radial-gradient(circle at center, transparent 0%, rgb(var(--color-void)) 100%)"
-            },
-            animation: {
-              'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-            }
-          }
-        }
-      }
-    </script>
-    <style>
-      :root {
-        /* Default Orbital Theme (RGB values) */
-        --color-void: 5 5 8;          /* #050508 */
-        --color-surface: 14 14 20;    /* #0E0E14 */
-        --color-surface-highlight: 26 26 36; /* #1A1A24 */
-        --color-content: 255 255 255;
-        --color-muted: 161 161 170;
-        --color-field: 0 0 0;
-        --color-neon-green: 204 255 0;  /* #CCFF00 */
-        --color-neon-purple: 112 0 255; /* #7000FF */
-        --color-neon-cyan: 0 240 255;   /* #00F0FF */
-        --color-neon-pink: 255 0 153;   /* #FF0099 */
-      }
-
-      body {
-        background-color: rgb(var(--color-void));
-        color: rgb(var(--color-content));
-        overflow-x: hidden;
-      }
-      /* Custom Scrollbar */
-      ::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
-      }
-      ::-webkit-scrollbar-track {
-        background: rgb(var(--color-void)); 
-      }
-      ::-webkit-scrollbar-thumb {
-        background: rgb(var(--color-surface-highlight)); 
-        border-radius: 4px;
-      }
-      ::-webkit-scrollbar-thumb:hover {
-        background: rgb(var(--color-content) / 0.2); 
-      }
-      .glass-panel {
-        background: rgba(var(--color-surface), 0.7);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(var(--color-content), 0.05);
-      }
-      .neon-text {
-        text-shadow: 0 0 10px rgba(var(--color-neon-green), 0.3);
-      }
-    </style>
-  <script type="importmap">
-{
-  "imports": {
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-    "react-dom": "https://aistudiocdn.com/react-dom@^19.2.0",
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "react": "https://aistudiocdn.com/react@^19.2.0",
-    "react-router-dom": "https://aistudiocdn.com/react-router-dom@^7.9.6",
-    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.554.0",
-    "framer-motion": "https://aistudiocdn.com/framer-motion@^12.23.24",
-    "recharts": "https://aistudiocdn.com/recharts@^3.5.0",
-    "vaul": "https://esm.sh/vaul@0.9.1?external=react,react-dom",
-    "clsx": "https://esm.sh/clsx@2.1.0",
-    "tailwind-merge": "https://esm.sh/tailwind-merge@2.2.1"
-  }
-}
-</script>
+    <link rel="stylesheet" href="/index.css">
 </head>
   <body>
     <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
   </body>
 </html>

@@ -72,12 +72,12 @@ export const DEFAULT_CATEGORIES = [
 // --- Theme Definitions ---
 
 export const PRESET_COLORS = [
-  { label: 'Orbital Green', value: '#CCFF00' },
-  { label: 'Cyber Cyan', value: '#00F0FF' },
-  { label: 'Hot Pink', value: '#FF0099' },
-  { label: 'Electric Purple', value: '#7000FF' },
-  { label: 'Plasma Orange', value: '#FF5F1F' },
-  { label: 'Matrix', value: '#00FF41' },
-  { label: 'Crimson', value: '#DC143C' },
-  { label: 'Goldenrod', value: '#DAA520' },
+  { label: 'Electric Blue', value: '#3B82F6' },
+  { label: 'Indigo', value: '#6366F1' },
+  { label: 'Violet', value: '#8B5CF6' },
+  { label: 'Emerald', value: '#10B981' },
+  { label: 'Rose', value: '#F43F5E' },
+  { label: 'Amber', value: '#F59E0B' },
+  { label: 'Cyan', value: '#06B6D4' },
+  { label: 'Slate', value: '#64748B' },
 ];
