@@ -280,7 +280,7 @@ export const Recurring: React.FC = () => {
                 animate={{ opacity: 1 }}
                 className="col-span-full"
               >
-                <div className="border-2 border-dashed border-border bg-bg-surface/50 p-16 flex flex-col items-center">
+                <div className="border border-border bg-bg-surface p-16 flex flex-col items-center">
                     <div className="p-4 bg-bg-surface-highlight border border-border mb-4">
                       <Repeat className="text-text-tertiary" size={32} />
                     </div>

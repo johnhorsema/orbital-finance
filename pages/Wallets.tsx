@@ -11,7 +11,7 @@ import { useNavigate } from 'react-router-dom';
 import { WalletIcon } from '../components/WalletIcon';
 
 export const Wallets: React.FC = () => {
-  const { state, addWallet, rates, globalCurrency } = useFinance();
+  const { state, addWallet, rates, globalCurrency, primaryColor } = useFinance();
   const navigate = useNavigate();
   const [isAdding, setIsAdding] = useState(false);
   
@@ -26,8 +26,7 @@ export const Wallets: React.FC = () => {
       name: newName,
       baseCurrency: newCurrency,
       type: newType,
-      color: newType === 'CRYPTO' ? '#FF0099' : '#00F0FF',
-      // Default icon based on type for simplicity in quick create, can be edited later
+      color: primaryColor,
       icon: '' 
     });
     setIsAdding(false);
@@ -48,45 +47,124 @@ export const Wallets: React.FC = () => {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {state.wallets.map((wallet, idx) => (
-          <motion.div
-            key={wallet.id}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: idx * 0.05 }}
-            onClick={() => navigate(`/wallet/${wallet.id}`)}
-            className="group relative bg-bg-surface border border-border hover:border-border-strong transition-all duration-200 h-56 flex flex-col justify-between p-6 cursor-pointer"
-          >
-            <div className="flex justify-between items-start">
-              <div className="p-3 bg-bg-surface-highlight border border-border">
-                <WalletIcon icon={wallet.icon} type={wallet.type} size={24} style={{ color: 'var(--color-accent)' }} />
+      {state.wallets.length === 0 ? (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          className="col-span-full"
+        >
+          <div className="border border-border bg-bg-surface p-16 flex flex-col items-center justify-center min-h-[60vh]">
+            {/* Icon */}
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.2, duration: 0.3 }}
+              className="p-6 bg-bg-surface-highlight border border-border mb-8"
+            >
+              <WalletIconDefault className="text-text-tertiary" size={48} />
+            </motion.div>
+            
+            {/* Text Content */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.3 }}
+              className="text-center max-w-md"
+            >
+              <h3 className="text-2xl font-sans font-medium text-text-primary mb-3">
+                No wallets yet
+              </h3>
+              <p className="text-text-secondary font-sans text-base leading-relaxed mb-8">
+                Create your first wallet to start tracking balances across multiple currencies and assets. Add fiat accounts, crypto holdings, or custom currencies.
+              </p>
+            </motion.div>
+
+            {/* CTA Button */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 0.3 }}
+            >
+              <Button 
+                variant="primary" 
+                icon={<Plus size={16} />} 
+                onClick={() => setIsAdding(true)}
+                className="h-12 px-8"
+              >
+                Create Your First Wallet
+              </Button>
+            </motion.div>
+
+            {/* Quick Tips */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5, duration: 0.3 }}
+              className="mt-12 pt-8 border-t border-border w-full max-w-lg"
+            >
+              <p className="text-xs font-mono text-text-tertiary uppercase tracking-wide mb-4 text-center">
+                Quick Start Guide
+              </p>
+              <div className="grid grid-cols-3 gap-6 text-center">
+                <div>
+                  <div className="text-text-secondary font-mono text-xs mb-1">1. Create</div>
+                  <div className="text-text-tertiary font-sans text-xs">Add a wallet</div>
+                </div>
+                <div>
+                  <div className="text-text-secondary font-mono text-xs mb-1">2. Track</div>
+                  <div className="text-text-tertiary font-sans text-xs">Monitor balances</div>
+                </div>
+                <div>
+                  <div className="text-text-secondary font-mono text-xs mb-1">3. Analyze</div>
+                  <div className="text-text-tertiary font-sans text-xs">View analytics</div>
+                </div>
               </div>
-              <span className="font-mono text-xs text-text-secondary border border-border px-2 py-1 uppercase">
-                {wallet.baseCurrency}
-              </span>
-            </div>
+            </motion.div>
+          </div>
+        </motion.div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {state.wallets.map((wallet, idx) => (
+            <motion.div
+              key={wallet.id}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.05 }}
+              onClick={() => navigate(`/wallet/${wallet.id}`)}
+              className="group relative bg-bg-surface border border-border transition-all duration-200 h-56 flex flex-col justify-between p-6 cursor-pointer hover:brightness-105"
+              style={{ borderColor: `${wallet.color}20` }}
+            >
+              <div className="flex justify-between items-start">
+                <div className="p-3 bg-bg-surface-highlight border border-border" style={{ borderColor: `${wallet.color}30` }}>
+                  <WalletIcon icon={wallet.icon} type={wallet.type} size={24} style={{ color: wallet.color }} />
+                </div>
+                <span className="font-mono text-xs text-text-secondary border border-border px-2 py-1 uppercase">
+                  {wallet.baseCurrency}
+                </span>
+              </div>
 
-            <div>
-               <h3 className="text-text-secondary font-sans text-sm mb-1">{wallet.name}</h3>
-               <div className="text-2xl font-mono font-semibold text-text-primary tracking-tight">
-                  {wallet.balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })}
-               </div>
-               
-               {/* Approximate Global Value */}
-               {wallet.baseCurrency !== globalCurrency && rates[wallet.baseCurrency.toLowerCase()] && (
-                 <div className="text-xs text-text-secondary font-mono mt-1">
-                   ≈ {(wallet.balance / rates[wallet.baseCurrency.toLowerCase()]).toFixed(2)} {globalCurrency}
+              <div>
+                 <h3 className="text-text-secondary font-sans text-sm mb-1">{wallet.name}</h3>
+                 <div className="text-2xl font-mono font-semibold tracking-tight" style={{ color: wallet.color }}>
+                    {wallet.balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })}
                  </div>
-               )}
-            </div>
+                 
+                 {/* Approximate Global Value */}
+                 {wallet.baseCurrency !== globalCurrency && rates[wallet.baseCurrency.toLowerCase()] && (
+                   <div className="text-xs text-text-secondary font-mono mt-1">
+                     ≈ {(wallet.balance / rates[wallet.baseCurrency.toLowerCase()]).toFixed(2)} {globalCurrency}
+                   </div>
+                 )}
+              </div>
 
-            <div className="pt-4 border-t border-border">
-                <Button size="sm" variant="secondary" className="w-full">Open</Button>
-            </div>
-          </motion.div>
-        ))}
-      </div>
+              <div className="pt-4 border-t border-border" style={{ borderColor: `${wallet.color}20` }}>
+                  <Button size="sm" variant="secondary" className="w-full">Open</Button>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      )}
 
       {/* Add Wallet Modal */}
       <AnimatePresence>

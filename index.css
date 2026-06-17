@@ -73,3 +73,8 @@ body {
 .bg-radial-fade {
   background-image: radial-gradient(circle at center, transparent 0%, var(--color-bg-primary) 100%);
 }
+
+/* Safe area support for mobile navigation */
+.safe-area-pb {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}

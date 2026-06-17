@@ -4,6 +4,7 @@ import { AppState, Wallet, Transaction, CurrencyCode, DEFAULT_CATEGORIES, User, 
 import { fetchExchangeRates, RateStatus } from '../services/currencyService';
 import { generateOrbitKey } from '../utils/crypto';
 import { generatePalette } from '../utils/themeGenerator';
+import { useActivityLog } from './ActivityLogContext';
 
 interface FinanceContextType {
   user: User | null;
@@ -76,6 +77,8 @@ const calculateNextDate = (currentDate: string, frequency: RecurrenceFrequency):
 };
 
 export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { logActivity } = useActivityLog();
+  
   const [user, setUser] = useState<User | null>(() => {
     const savedUser = localStorage.getItem('orbital_current_user');
     return savedUser ? JSON.parse(savedUser) : null;
@@ -261,10 +264,10 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
             const seedState: AppState = {
                 wallets: [
-                    { id: 'w1', name: 'Main Ops', type: 'FIAT', baseCurrency: 'USD', balance: 0, color: '#CCFF00' },
-                    { id: 'w2', name: 'Euro Trip', type: 'FIAT', baseCurrency: 'EUR', balance: 0, color: '#00F0FF' },
-                    { id: 'w3', name: 'Cold Storage', type: 'CRYPTO', baseCurrency: 'BTC', balance: 0, color: '#FF0099' },
-                    { id: 'w4', name: 'Solana Degen', type: 'CRYPTO', baseCurrency: 'SOL', balance: 0, color: '#7000FF' }
+                    { id: 'w1', name: 'Main Ops', type: 'FIAT', baseCurrency: 'USD', balance: 0, color: '#3B82F6' },
+                    { id: 'w2', name: 'Euro Trip', type: 'FIAT', baseCurrency: 'EUR', balance: 0, color: '#10B981' },
+                    { id: 'w3', name: 'Cold Storage', type: 'CRYPTO', baseCurrency: 'BTC', balance: 0, color: '#F59E0B' },
+                    { id: 'w4', name: 'Solana Degen', type: 'CRYPTO', baseCurrency: 'SOL', balance: 0, color: '#06B6D4' }
                 ],
                 transactions: [
                     { id: 't1', userId: 'demo-user-id', walletId: 'w1', date: today, amount: 8500, currency: 'USD', convertedAmount: 8500, type: 'INCOME', category: 'Salary', description: 'Monthly Settlement' },
@@ -357,6 +360,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
     if (foundUser) {
       setUser(foundUser);
+      logActivity('LOGIN', `User '${foundUser.username}' logged in`);
       return true;
     }
     return false;
@@ -376,6 +380,9 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const logout = () => {
+    if (user) {
+      logActivity('LOGOUT', `User '${user.username}' logged out`);
+    }
     setUser(null);
   };
 
@@ -421,6 +428,8 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setState(prev => {
         const newTransactions = [newTx, ...prev.transactions];
         const updatedWallets = recalculateBalances(newTransactions, prev.wallets);
+        
+        logActivity('TRANSACTION_CREATE', `Added ${tx.type.toLowerCase()} transaction: ${tx.description}`, `${tx.amount} ${tx.currency}`, tx.walletId);
 
         return {
             ...prev,
@@ -469,11 +478,15 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const deleteTransaction = (id: string) => {
+      const tx = state.transactions.find(t => t.id === id);
       setState(prev => {
           const newTransactions = prev.transactions.filter(t => t.id !== id);
           const updatedWallets = recalculateBalances(newTransactions, prev.wallets);
           return { ...prev, transactions: newTransactions, wallets: updatedWallets };
       });
+      if (tx) {
+          logActivity('TRANSACTION_DELETE', `Deleted transaction: ${tx.description}`, `${tx.amount} ${tx.currency}`);
+      }
   };
 
   const transferFunds = async (sourceId: string, targetId: string, amount: number) => {
@@ -537,20 +550,29 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
           ...prev,
           recurring: [...(prev.recurring || []), newRule]
       }));
+      logActivity('TRANSACTION_CREATE', `Created recurring transaction: ${rt.description}`, `${rt.frequency} - ${rt.amount} ${rt.currency}`);
   };
 
   const deleteRecurringTransaction = (id: string) => {
+      const rule = state.recurring.find(r => r.id === id);
       setState(prev => ({
           ...prev,
           recurring: prev.recurring.filter(r => r.id !== id)
       }));
+      if (rule) {
+          logActivity('TRANSACTION_DELETE', `Deleted recurring transaction: ${rule.description}`);
+      }
   };
 
   const toggleRecurringTransaction = (id: string) => {
+      const rule = state.recurring.find(r => r.id === id);
       setState(prev => ({
           ...prev,
           recurring: prev.recurring.map(r => r.id === id ? { ...r, active: !r.active } : r)
       }));
+      if (rule) {
+          logActivity('SETTINGS_CHANGE', `${rule.active ? 'Disabled' : 'Enabled'} recurring: ${rule.description}`);
+      }
   };
 
   // --- WALLET / CAT CRUD ---
@@ -562,6 +584,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
           balance: 0
       };
       setState(prev => ({ ...prev, wallets: [...prev.wallets, newWallet] }));
+      logActivity('WALLET_SWITCH', `Created wallet: ${walletData.name}`, `${walletData.type} - ${walletData.baseCurrency}`);
   };
 
   const updateWallet = (id: string, updates: Partial<Wallet>) => {
@@ -572,12 +595,16 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const deleteWallet = (id: string) => {
+      const wallet = state.wallets.find(w => w.id === id);
       setState(prev => ({
           ...prev,
           wallets: prev.wallets.filter(w => w.id !== id),
           transactions: prev.transactions.filter(t => t.walletId !== id),
           recurring: prev.recurring.filter(r => r.walletId !== id)
       }));
+      if (wallet) {
+          logActivity('WALLET_SWITCH', `Deleted wallet: ${wallet.name}`, `${wallet.type} - ${wallet.baseCurrency}`);
+      }
   };
 
   const addCategory = (category: string) => {
@@ -597,6 +624,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
               if (!parsed.categories) parsed.categories = DEFAULT_CATEGORIES;
               if (!parsed.recurring) parsed.recurring = [];
               setState(parsed);
+              logActivity('DATA_EXPORT', 'Imported data from JSON file');
               return true;
           }
           return false;

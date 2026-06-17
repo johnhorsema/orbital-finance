@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useFinance } from '../context/FinanceContext';
-import { Calendar, ChevronLeft, ChevronRight, Grid3X3 } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, Grid3X3, BarChart3 } from 'lucide-react';
 import { CurrencyCode } from '../types';
 
 const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -149,66 +149,80 @@ export const Analytics: React.FC = () => {
              <h2 className="text-lg font-sans font-medium text-text-primary">Daily Spending Heatmap</h2>
          </div>
          
-         <div className="overflow-x-auto">
-             <div className="min-w-[800px]">
-                 <div className="flex mb-2 pl-8">
-                     {MONTH_LABELS.map((m, i) => (
-                         <div key={m} className="flex-1 text-xs font-mono text-text-secondary" style={{ marginLeft: i > 0 ? '0' : '0' }}>{m}</div>
-                     ))}
+         {Object.keys(dailyData).length === 0 ? (
+             <div className="flex flex-col items-center justify-center py-16 border border-dashed border-border">
+                 <div className="w-16 h-16 mb-4 flex items-center justify-center bg-bg-surface-highlight border border-border">
+                     <BarChart3 className="text-text-tertiary" size={32} />
                  </div>
-                 
-                 <div className="flex gap-3">
-                     <div className="flex flex-col justify-between text-[10px] font-mono text-text-secondary py-1 h-[112px] w-7">
-                         <span>Sun</span>
-                         <span>Tue</span>
-                         <span>Thu</span>
-                         <span>Sat</span>
+                 <p className="text-text-secondary font-mono text-sm text-center">
+                     No expense data for {selectedYear}
+                 </p>
+                 <p className="text-text-tertiary text-xs mt-2 font-mono text-center max-w-sm">
+                     Add transactions to visualize your daily spending patterns throughout the year
+                 </p>
+             </div>
+         ) : (
+             <div className="overflow-x-auto">
+                 <div className="min-w-[800px]">
+                     <div className="flex mb-2 pl-8">
+                         {MONTH_LABELS.map((m, i) => (
+                             <div key={m} className="flex-1 text-xs font-mono text-text-secondary" style={{ marginLeft: i > 0 ? '0' : '0' }}>{m}</div>
+                         ))}
                      </div>
                      
-                     <div className="flex-1 grid grid-rows-7 grid-flow-col gap-1 h-[112px]">
-                         {calendarGrid.map((date, i) => {
-                             if (!date) return <div key={`empty-${i}`} className="w-3 h-3 bg-transparent" />;
-                             
-                             const dateStr = date.toISOString().split('T')[0];
-                             const value = dailyData[dateStr] || 0;
-                             
-                             return (
-                                 <div 
-                                    key={dateStr}
-                                    onMouseEnter={() => setHoveredCell({ type: 'daily', data: { date, value } })}
-                                    onMouseLeave={() => setHoveredCell(null)}
-                                    className="w-3 h-3 transition-all duration-150 hover:scale-150 hover:z-10 cursor-pointer"
-                                    style={{ 
-                                        backgroundColor: getHeatColor(value, maxDailySpend),
-                                    }}
-                                 />
-                             );
-                         })}
-                     </div>
-                 </div>
-                 
-                 <div className="flex justify-between items-center mt-4 pt-4 border-t border-border">
-                     <div className="text-xs font-mono text-text-secondary">
-                         {Object.keys(dailyData).length > 0 
-                             ? `${Object.keys(dailyData).length} days with expenses`
-                             : 'No expense data for this year'
-                         }
-                     </div>
-                     <div className="flex items-center gap-2 text-xs font-mono text-text-secondary">
-                         <span>Less</span>
-                         <div className="flex gap-1">
-                             <div className="w-3 h-3" style={{ backgroundColor: 'var(--color-bg-surface)' }} />
-                             <div className="w-3 h-3" style={{ backgroundColor: getHeatColor(0.1, 1) }} />
-                             <div className="w-3 h-3" style={{ backgroundColor: getHeatColor(0.3, 1) }} />
-                             <div className="w-3 h-3" style={{ backgroundColor: getHeatColor(0.5, 1) }} />
-                             <div className="w-3 h-3" style={{ backgroundColor: getHeatColor(0.7, 1) }} />
-                             <div className="w-3 h-3" style={{ backgroundColor: getHeatColor(0.9, 1) }} />
+                     <div className="flex gap-3">
+                         <div className="flex flex-col justify-between text-[10px] font-mono text-text-secondary py-1 h-[112px] w-7">
+                             <span>Sun</span>
+                             <span>Tue</span>
+                             <span>Thu</span>
+                             <span>Sat</span>
                          </div>
-                         <span>More</span>
+                         
+                         <div className="flex-1 grid grid-rows-7 grid-flow-col gap-1 h-[112px]">
+                             {calendarGrid.map((date, i) => {
+                                 if (!date) return <div key={`empty-${i}`} className="w-3 h-3 bg-transparent" />;
+                                 
+                                 const dateStr = date.toISOString().split('T')[0];
+                                 const value = dailyData[dateStr] || 0;
+                                 
+                                 return (
+                                     <div 
+                                        key={dateStr}
+                                        onMouseEnter={() => setHoveredCell({ type: 'daily', data: { date, value } })}
+                                        onMouseLeave={() => setHoveredCell(null)}
+                                        className="w-3 h-3 transition-all duration-150 hover:scale-150 hover:z-10 cursor-pointer"
+                                        style={{ 
+                                            backgroundColor: getHeatColor(value, maxDailySpend),
+                                        }}
+                                     />
+                                 );
+                             })}
+                         </div>
+                     </div>
+                     
+                     <div className="flex justify-between items-center mt-4 pt-4 border-t border-border">
+                         <div className="text-xs font-mono text-text-secondary">
+                             {Object.keys(dailyData).length > 0 
+                                 ? `${Object.keys(dailyData).length} days with expenses`
+                                 : 'No expense data for this year'
+                             }
+                         </div>
+                         <div className="flex items-center gap-2 text-xs font-mono text-text-secondary">
+                             <span>Less</span>
+                             <div className="flex gap-1">
+                                 <div className="w-3 h-3" style={{ backgroundColor: 'var(--color-bg-surface)' }} />
+                                 <div className="w-3 h-3" style={{ backgroundColor: getHeatColor(0.1, 1) }} />
+                                 <div className="w-3 h-3" style={{ backgroundColor: getHeatColor(0.3, 1) }} />
+                                 <div className="w-3 h-3" style={{ backgroundColor: getHeatColor(0.5, 1) }} />
+                                 <div className="w-3 h-3" style={{ backgroundColor: getHeatColor(0.7, 1) }} />
+                                 <div className="w-3 h-3" style={{ backgroundColor: getHeatColor(0.9, 1) }} />
+                             </div>
+                             <span>More</span>
+                         </div>
                      </div>
                  </div>
              </div>
-         </div>
+         )}
       </div>
 
       <div className="bg-bg-surface border border-border p-6">
@@ -218,12 +232,15 @@ export const Analytics: React.FC = () => {
          </div>
 
          {Object.keys(categoryMatrix).length === 0 ? (
-             <div className="text-center py-16 border border-dashed border-border">
-                 <p className="text-text-secondary font-mono text-sm">
-                     No expense data for {selectedYear}
+             <div className="flex flex-col items-center justify-center py-16 border border-dashed border-border">
+                 <div className="w-16 h-16 mb-4 flex items-center justify-center bg-bg-surface-highlight border border-border">
+                     <Grid3X3 className="text-text-tertiary" size={32} />
+                 </div>
+                 <p className="text-text-secondary font-mono text-sm text-center">
+                     No category data for {selectedYear}
                  </p>
-                 <p className="text-text-tertiary text-xs mt-2 font-mono">
-                     Add transactions to see spending patterns
+                 <p className="text-text-tertiary text-xs mt-2 font-mono text-center max-w-sm">
+                     Add categorized expenses to see spending patterns across different categories
                  </p>
              </div>
          ) : (

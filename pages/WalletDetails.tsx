@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, ArrowRightLeft, TrendingUp, X, Trash2, Edit, Save, PieChart as PieChartIcon, Plus, Search } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { TransactionDetailsModal } from '../components/TransactionDetailsModal';
-import { Transaction, CurrencyCode, SUPPORTED_CURRENCIES } from '../types';
+import { Transaction, CurrencyCode, SUPPORTED_CURRENCIES, PRESET_COLORS } from '../types';
 import { Drawer } from 'vaul';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { WalletIcon, ICON_OPTIONS } from '../components/WalletIcon';
@@ -256,12 +256,12 @@ export const WalletDetails: React.FC = () => {
         <div>
            <label className="block text-xs font-mono text-text-tertiary mb-2 uppercase tracking-wide">Theme Color</label>
            <div className="flex flex-wrap gap-2 items-center">
-              {['oklch(0.65 0.18 250)', 'oklch(0.72 0.16 145)', 'oklch(0.62 0.18 25)', 'oklch(0.75 0.15 85)', 'oklch(0.65 0.12 320)', 'oklch(0.95 0.005 260)'].map(c => (
+              {PRESET_COLORS.map(preset => (
                   <button
-                      key={c}
-                      onClick={() => setEditColor(c)}
-                      className={`h-8 w-8 border-2 transition-all duration-150 ${editColor === c ? 'border-text-primary scale-110' : 'border-transparent hover:border-border'}`}
-                      style={{ backgroundColor: c }}
+                      key={preset.value}
+                      onClick={() => setEditColor(preset.value)}
+                      className={`h-8 w-8 border-2 transition-all duration-150 ${editColor.toLowerCase() === preset.value.toLowerCase() ? 'border-text-primary scale-110' : 'border-transparent hover:border-border'}`}
+                      style={{ backgroundColor: preset.value }}
                   />
               ))}
               {/* Custom Color Input */}
@@ -325,7 +325,7 @@ export const WalletDetails: React.FC = () => {
         <div className="flex items-start justify-between gap-6">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-3 mb-2">
-              <WalletIcon icon={wallet.icon} type={wallet.type} size={24} className="text-text-secondary" />
+              <WalletIcon icon={wallet.icon} type={wallet.type} size={24} style={{ color: wallet.color }} />
               <h1 className="text-3xl font-semibold text-text-primary tracking-tight truncate">
                 {wallet.name}
               </h1>
@@ -351,9 +351,9 @@ export const WalletDetails: React.FC = () => {
 
       {/* Balance Card + Actions */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
-        <div className="lg:col-span-2 bg-bg-surface border border-border p-6">
+        <div className="lg:col-span-2 bg-bg-surface border border-border p-6" style={{ borderColor: `${wallet.color}30` }}>
           <div className="text-sm text-text-secondary mb-1 font-mono uppercase tracking-wide">Available Balance</div>
-          <div className="text-4xl font-mono font-semibold text-text-primary tracking-tight mb-6">
+          <div className="text-4xl font-mono font-semibold tracking-tight mb-6" style={{ color: wallet.color }}>
             {wallet.balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })}
             <span className="text-lg text-text-secondary ml-2">{wallet.baseCurrency}</span>
           </div>
@@ -594,42 +594,33 @@ export const WalletDetails: React.FC = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.15 }}
-              className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+              transition={{ duration: 0.15, ease: 'easeOut' }}
+              className="absolute inset-0 bg-bg-primary/90 backdrop-blur-md"
               onClick={() => setIsAddingTx(false)}
             />
             <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: 20, opacity: 0 }}
-              transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-              className="bg-bg-surface border border-border p-6 w-full max-w-lg relative z-10"
+              initial={{ y: 40, opacity: 0, scale: 0.98 }}
+              animate={{ y: 0, opacity: 1, scale: 1 }}
+              exit={{ y: 40, opacity: 0, scale: 0.98 }}
+              transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+              className="bg-bg-surface border border-border w-full max-w-lg relative z-[101]"
             >
-               <button onClick={() => setIsAddingTx(false)} className="absolute top-4 right-4 text-text-secondary hover:text-text-primary transition-colors duration-150">
-                 <X size={20} />
-               </button>
-               <h2 className="text-xl font-semibold text-text-primary mb-6">Log Transaction</h2>
-               <AddTransactionForm />
+               <div className="p-8">
+                 <button onClick={() => setIsAddingTx(false)} className="absolute top-5 right-5 p-1.5 text-text-tertiary hover:text-text-primary hover:bg-bg-surface-highlight transition-colors" aria-label="Close modal">
+                   <X size={20} />
+                 </button>
+                 <div className="mb-6">
+                   <h2 className="text-2xl font-sans font-semibold text-text-primary">Log Transaction</h2>
+                   <p className="text-text-secondary font-mono text-sm mt-1">Add a new income or expense entry</p>
+                 </div>
+                 <AddTransactionForm />
+               </div>
             </motion.div>
           </div>
         )}
       </AnimatePresence>
       
-      {/* Add Transaction Drawer (Mobile) */}
-      <div className="md:hidden">
-        <Drawer.Root open={isAddingTx} onOpenChange={setIsAddingTx}>
-            <Drawer.Portal>
-                <Drawer.Overlay className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100]" />
-                <Drawer.Content className="bg-bg-surface border-t border-border flex flex-col h-[85vh] mt-24 fixed bottom-0 left-0 right-0 z-[101] outline-none">
-                    <div className="p-4 bg-bg-surface flex-1 overflow-y-auto">
-                        <div className="mx-auto w-12 h-1 flex-shrink-0 bg-bg-elevated mb-6" />
-                        <Drawer.Title className="text-xl font-semibold text-text-primary mb-6">Log Transaction</Drawer.Title>
-                        <AddTransactionForm />
-                    </div>
-                </Drawer.Content>
-            </Drawer.Portal>
-        </Drawer.Root>
-      </div>
+
 
       {/* Transfer Modal */}
       <AnimatePresence>
@@ -736,21 +727,7 @@ export const WalletDetails: React.FC = () => {
         )}
       </AnimatePresence>
       
-      {/* Edit Wallet Drawer (Mobile) */}
-      <div className="md:hidden">
-        <Drawer.Root open={isEditingWallet} onOpenChange={setIsEditingWallet}>
-            <Drawer.Portal>
-                <Drawer.Overlay className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100]" />
-                <Drawer.Content className="bg-bg-surface border-t border-border flex flex-col fixed bottom-0 left-0 right-0 z-[101] outline-none">
-                    <div className="p-4 bg-bg-surface">
-                        <div className="mx-auto w-12 h-1 flex-shrink-0 bg-bg-elevated mb-6" />
-                        <Drawer.Title className="text-xl font-semibold text-text-primary mb-6">Edit Wallet</Drawer.Title>
-                        {renderEditForm()}
-                    </div>
-                </Drawer.Content>
-            </Drawer.Portal>
-        </Drawer.Root>
-      </div>
+
     </div>
   );
 };

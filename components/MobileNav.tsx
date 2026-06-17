@@ -1,43 +1,59 @@
 
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Wallet, Radio, Settings, BarChart3, Repeat } from 'lucide-react';
+import { LayoutDashboard, Wallet, BarChart3, Settings, Repeat } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const NAV_ITEMS = [
-  { path: '/', label: 'Overview', icon: <LayoutDashboard size={20} /> },
-  { path: '/wallets', label: 'Wallets', icon: <Wallet size={20} /> },
-  { path: '/analytics', label: 'Stats', icon: <BarChart3 size={20} /> },
-  { path: '/recurring', label: 'Auto', icon: <Repeat size={20} /> },
-  { path: '/settings', label: 'Config', icon: <Settings size={20} /> },
+  { path: '/', label: 'Overview', icon: LayoutDashboard },
+  { path: '/wallets', label: 'Wallets', icon: Wallet },
+  { path: '/analytics', label: 'Analytics', icon: BarChart3 },
+  { path: '/recurring', label: 'Recurring', icon: Repeat },
+  { path: '/settings', label: 'Settings', icon: Settings },
 ];
 
 export const MobileNav: React.FC = () => {
   const location = useLocation();
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 h-20 bg-surface/90 backdrop-blur-xl border-t border-white/10 z-[60] md:hidden px-6 pb-2">
-      <div className="flex items-center justify-between h-full">
+    <nav className="fixed bottom-0 left-0 right-0 bg-bg-surface/95 backdrop-blur-xl border-t border-border z-[60] md:hidden safe-area-pb">
+      <div className="flex items-stretch h-16">
         {NAV_ITEMS.map((item) => {
           const isActive = location.pathname === item.path;
+          const Icon = item.icon;
+          
           return (
-            <Link to={item.path} key={item.path} className="flex flex-col items-center justify-center gap-1 w-full relative">
+            <Link
+              to={item.path}
+              key={item.path}
+              className="flex-1 flex flex-col items-center justify-center gap-1 min-h-[44px] relative transition-colors duration-150"
+              aria-current={isActive ? 'page' : undefined}
+            >
               {isActive && (
-                <motion.div 
+                <motion.div
                   layoutId="mobileActiveTab"
-                  className="absolute -top-[17px] w-12 h-1 bg-neon-green shadow-[0_0_10px_#ccff00]"
+                  transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                  className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-accent"
                 />
               )}
-              <div className={`transition-colors duration-200 ${isActive ? 'text-neon-green' : 'text-gray-500'}`}>
-                {item.icon}
+              <div
+                className={`flex items-center justify-center w-11 h-11 rounded transition-colors duration-150 ${
+                  isActive ? 'text-accent' : 'text-text-secondary'
+                }`}
+              >
+                <Icon size={20} strokeWidth={isActive ? 2.5 : 1.5} />
               </div>
-              <span className={`text-[10px] font-mono tracking-wide ${isActive ? 'text-white' : 'text-gray-600'}`}>
+              <span
+                className={`text-[10px] font-mono tracking-wide leading-none ${
+                  isActive ? 'text-text-primary' : 'text-text-tertiary'
+                }`}
+              >
                 {item.label}
               </span>
             </Link>
           );
         })}
       </div>
-    </div>
+    </nav>
   );
 };

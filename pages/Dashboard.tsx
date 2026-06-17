@@ -455,41 +455,33 @@ export const Dashboard: React.FC = () => {
               initial={{ opacity: 0 }} 
               animate={{ opacity: 1 }} 
               exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-bg-primary/90 backdrop-blur-sm"
+              transition={{ duration: 0.15, ease: 'easeOut' }}
+              className="absolute inset-0 bg-bg-primary/90 backdrop-blur-md"
               onClick={() => setIsAddingTx(false)}
             />
             <motion.div 
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: 20, opacity: 0 }}
-              transition={{ duration: 0.2, ease: "easeOut" }}
-              className="bg-bg-surface border border-border p-8 w-full max-w-lg relative z-10"
+              initial={{ y: 40, opacity: 0, scale: 0.98 }}
+              animate={{ y: 0, opacity: 1, scale: 1 }}
+              exit={{ y: 40, opacity: 0, scale: 0.98 }}
+              transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+              className="bg-bg-surface border border-border w-full max-w-lg relative z-[101]"
             >
-               <button onClick={() => setIsAddingTx(false)} className="absolute top-4 right-4 text-text-secondary hover:text-text-primary">
-                 <X size={20} />
-               </button>
-               <h2 className="text-2xl font-sans font-semibold text-text-primary mb-6">Log Transaction</h2>
-               <AddTransactionForm />
+               <div className="p-8">
+                 <button onClick={() => setIsAddingTx(false)} className="absolute top-5 right-5 p-1.5 text-text-tertiary hover:text-text-primary hover:bg-bg-surface-highlight transition-colors" aria-label="Close modal">
+                   <X size={20} />
+                 </button>
+                 <div className="mb-6">
+                   <h2 className="text-2xl font-sans font-semibold text-text-primary">Log Transaction</h2>
+                   <p className="text-text-secondary font-mono text-sm mt-1">Add a new income or expense entry</p>
+                 </div>
+                 <AddTransactionForm />
+               </div>
             </motion.div>
           </div>
         )}
       </AnimatePresence>
 
-      {/* Add Transaction Mobile Drawer */}
-      <div className="md:hidden">
-        <Drawer.Root open={isAddingTx} onOpenChange={setIsAddingTx}>
-            <Drawer.Portal>
-                <Drawer.Overlay className="fixed inset-0 bg-bg-primary/90 backdrop-blur-sm z-[100]" />
-                <Drawer.Content className="bg-bg-surface border-t border-border flex flex-col rounded-t-sm h-[85vh] mt-24 fixed bottom-0 left-0 right-0 z-[101] outline-none">
-                    <div className="p-4 bg-bg-surface rounded-t-sm flex-1 overflow-y-auto">
-                        <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-border mb-8" />
-                        <Drawer.Title className="text-xl font-sans font-semibold text-text-primary mb-6">Log Transaction</Drawer.Title>
-                        <AddTransactionForm />
-                    </div>
-                </Drawer.Content>
-            </Drawer.Portal>
-        </Drawer.Root>
-      </div>
+
     </motion.div>
   );
 };

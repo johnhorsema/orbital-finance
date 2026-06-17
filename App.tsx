@@ -1,10 +1,11 @@
-
-
 import React from 'react';
 import { HashRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { FinanceProvider, useFinance } from './context/FinanceContext';
+import { ActivityLogProvider, useActivityLog } from './context/ActivityLogContext';
 import { Sidebar } from './components/Sidebar';
 import { MobileNav } from './components/MobileNav';
+import { ActivityLogTrigger } from './components/ActivityLogTrigger';
+import { ActivityLogPanel } from './components/ActivityLogPanel';
 import { Dashboard } from './pages/Dashboard';
 import { Wallets } from './pages/Wallets';
 import { WalletDetails } from './pages/WalletDetails';
@@ -17,12 +18,33 @@ import { Recurring } from './pages/Recurring';
 import { WalletSwitcher } from './components/WalletSwitcher';
 import { AnimatePresence } from 'framer-motion';
 
+// Navigation Tracker Component
+const NavigationTracker = () => {
+  const { logActivity } = useActivityLog();
+  const { user } = useFinance();
+  const location = useLocation();
+
+  React.useEffect(() => {
+    if (user) {
+      logActivity('NAVIGATION', `Navigated to ${location.pathname}`, undefined, location.pathname);
+    }
+  }, [location.pathname, user]);
+
+  return null;
+};
+
 // Top Bar for Desktop with Switcher
 const DesktopTopBar = () => {
   return (
-    <div className="hidden md:flex absolute top-0 left-0 right-0 h-20 items-center justify-center pointer-events-none z-40">
+    <div className="hidden md:flex absolute top-0 left-0 right-0 h-20 items-center pointer-events-none z-40">
+       <div className="flex-1" />
        <div className="pointer-events-auto">
          <WalletSwitcher />
+       </div>
+       <div className="flex-1 flex justify-end pr-8">
+         <div className="pointer-events-auto">
+           <ActivityLogTrigger />
+         </div>
        </div>
     </div>
   );
@@ -31,8 +53,13 @@ const DesktopTopBar = () => {
 // Mobile Top Bar
 const MobileTopBar = () => {
   return (
-    <div className="flex md:hidden fixed top-0 left-0 right-0 h-16 items-center justify-center bg-bg-surface/80 backdrop-blur-md border-b border-border z-40 px-4">
-       <WalletSwitcher />
+    <div className="flex md:hidden fixed top-0 left-0 right-0 h-16 items-center justify-between bg-bg-surface/80 backdrop-blur-md border-b border-border z-40 px-4">
+       <div className="pointer-events-auto">
+         <WalletSwitcher />
+       </div>
+       <div className="pointer-events-auto">
+         <ActivityLogTrigger />
+       </div>
     </div>
   );
 };
@@ -47,6 +74,7 @@ const ProtectedLayout: React.FC = () => {
 
   return (
     <div className="flex min-h-screen bg-bg-primary text-text-primary selection:bg-accent selection:text-bg-primary">
+      <NavigationTracker />
       <Sidebar />
       <div className="flex-1 md:ml-64 relative pb-24 md:pb-0">
          <MobileTopBar />
@@ -73,6 +101,7 @@ const ProtectedLayout: React.FC = () => {
          </main>
       </div>
       <MobileNav />
+      <ActivityLogPanel />
     </div>
   );
 };
@@ -92,9 +121,11 @@ const AppContent: React.FC = () => {
 
 const App: React.FC = () => {
   return (
-    <FinanceProvider>
-        <AppContent />
-    </FinanceProvider>
+    <ActivityLogProvider>
+        <FinanceProvider>
+            <AppContent />
+        </FinanceProvider>
+    </ActivityLogProvider>
   );
 };
 
