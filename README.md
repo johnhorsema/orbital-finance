@@ -15,27 +15,36 @@ Unlike traditional finance apps that lock you into a single currency or boring s
 - **Multi-Wallet Architecture**: Create distinct vaults for different purposes (e.g., "Main Stash", "Travel Fund", "Cold Storage").
 - **Hybrid Asset Support**: Native support for Fiat (USD, EUR, GBP, JPY) and Crypto (BTC, ETH, SOL) assets.
 - **Global Unit of Account**: Instantly normalize your entire net worth into a single currency (e.g., View your BTC and JPY holdings in USD) using real-time exchange rates.
+- **Activity Log**: Comprehensive audit trail of all financial operations with filterable history and detailed event tracking.
 - **Privacy-First (Local)**: Data is stored locally in your browser. No external servers hold your financial data.
 - **Orbit Key Auth**: Unique client-side credential generation (SHA-256) ensures only you can decrypt/access your local session.
 - **Data Sovereignty**: Full JSON export and import capabilities.
-- **Sci-Fi Aesthetic**: A "Void & Neon" design language featuring glassmorphism, micro-interactions, and fluid animations.
+- **Dynamic Theme System**: Wallet-specific color theming with customizable primary colors and light/dark mode support.
+- **Premium UI/UX**: Refined futurism design with glassmorphism, micro-interactions, fluid animations, and responsive layouts.
+- **Recurring Transactions**: Automated scheduling for regular income and expenses with status tracking.
 
 ---
 
 ## 📸 Screenshots
 
 ### Overview
-<img width="1206" height="675" alt="overview" src="https://github.com/user-attachments/assets/0cd67d02-11a6-4fe6-8b11-3b612b875f30" />
+<img width="1206" height="675" alt="overview" src="screenshots/dashboard.png" />
 
-### Exchange Rate
-<img width="1223" height="651" alt="exchange-rates" src="https://github.com/user-attachments/assets/d20e85c0-d0f6-486b-8c72-dd197baab881" />
+### Spending Analysis
+<img width="1223" height="651" alt="spending-analysis" src="screenshots/spending.png" />
+
+### Settings
+<img width="1223" height="651" alt="settings" src="screenshots/settings.png" />
+
+### Activity Log
+<img width="1206" height="675" alt="activity-log" src="screenshots/activity-log.png" />
 
 ---
 
 ## 🛠 Tech Stack
 
 - **Core**: [React 19](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/)
-- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/) with OKLCH color system
 - **Motion**: [Framer Motion](https://www.framer.com/motion/)
 - **Icons**: [Lucide React](https://lucide.dev/)
 - **Charts**: [Recharts](https://recharts.org/)
@@ -48,7 +57,11 @@ Unlike traditional finance apps that lock you into a single currency or boring s
 ## 🏗 Architecture
 
 ### State Management
-The application utilizes a monolithic Context provider (`FinanceContext.tsx`) to manage global state. This ensures immediate consistency between wallets, transactions, and the exchange rate service.
+The application utilizes a modular Context provider architecture:
+- **FinanceContext**: Manages global state for wallets, transactions, exchange rates, and theme configuration.
+- **ActivityLogContext**: Tracks all user operations with timestamped events, categories, and metadata.
+
+This ensures immediate consistency between wallets, transactions, activity logs, and the exchange rate service.
 
 ### Authentication (`Orbital Identity`)
 We do not use a traditional backend auth system. Instead, we use a **Local Deterministic Identity** model:
@@ -59,12 +72,13 @@ We do not use a traditional backend auth system. Instead, we use a **Local Deter
 ### Directory Structure
 ```
 src/
-├── components/       # Reusable UI components (Buttons, Modals, Sidebar)
-├── context/         # Global State (FinanceContext)
-├── pages/           # Route views (Dashboard, Wallets, Settings)
+├── components/       # Reusable UI components (Buttons, Modals, Sidebar, ActivityLog)
+├── context/         # Global State (FinanceContext, ActivityLogContext)
+├── hooks/           # Custom React hooks (useReducedMotion)
+├── pages/           # Route views (Dashboard, Wallets, Settings, Analytics)
 ├── services/        # External API integrations (currencyService)
 ├── types/           # TypeScript interfaces
-└── utils/           # Helper functions (crypto, formatting)
+└── utils/           # Helper functions (crypto, formatting, theme generation)
 ```
 
 ---
@@ -120,7 +134,7 @@ We welcome contributions from the community! Whether it's a bug fix, a new featu
 *   **TypeScript**: Strict mode is enabled. No `any` unless absolutely necessary.
 *   **Styling**: Use Tailwind utility classes. Avoid inline styles.
 *   **Components**: Keep components small and functional. Extract logic to hooks where possible.
-*   **Aesthetics**: Respect the "Void" theme (Dark mode only). Use CSS variables defined in `index.html` configuration.
+*   **Aesthetics**: Support dynamic theming with OKLCH color system. Use CSS variables defined in `index.css`. Respect both light and dark modes.
 
 ---
 
@@ -130,6 +144,10 @@ We welcome contributions from the community! Whether it's a bug fix, a new featu
 - [ ] **Budgeting**: Monthly caps per category with visual alerts.
 - [ ] **More Chains**: Integration with live on-chain data for wallet balances.
 - [x] **Visualizations**: Heatmaps for spending habits.
+- [x] **Activity Log**: Comprehensive audit trail for all financial operations.
+- [x] **Dynamic Theming**: Wallet-specific color theming with light/dark mode.
+- [x] **Recurring Transactions**: Automated scheduling for regular transactions.
+- [x] **Design System**: Refined futurism UI with responsive layouts and micro-interactions.
 
 ---
 
